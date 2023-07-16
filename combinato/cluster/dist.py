@@ -7,6 +7,7 @@ between clusters, groups etc
 # pylint: disable=E1101
 from __future__ import division, print_function, absolute_import
 import numpy as np
+
 # import sys
 from .. import options, CLID_UNMATCHED
 
@@ -19,11 +20,11 @@ def distances_euclidean(all_spikes, templates):
 
     ret = np.empty((all_spikes.shape[0], templates.shape[0]))
 
-    print('Calculating distances')
+    print("Calculating distances")
 
     for i, template in enumerate(templates):
         # print(i, end=' ')
-        ret[:, i] = np.sqrt(((all_spikes - template)**2).sum(1))
+        ret[:, i] = np.sqrt(((all_spikes - template) ** 2).sum(1))
 
     # print()
     # sys.stdout.flush()
@@ -48,7 +49,7 @@ def template_match(spikes, sort_idx, match_idx, factor):
 
     ids, mean_array, stds = get_means(sort_idx, spikes)
 
-    if options['ExcludeVariableClustersMatch']:
+    if options["ExcludeVariableClustersMatch"]:
         median_std = np.median(stds)
         std_too_high_idx = stds > 3 * median_std
         mean_array = mean_array[~std_too_high_idx]
@@ -62,33 +63,31 @@ def template_match(spikes, sort_idx, match_idx, factor):
     minimizers = ids[minimizers_idx]
 
     minima = all_distances.min(1)
-    minimizers[minima >= options['FirstMatchMaxDist'] * num_samples] =\
-        CLID_UNMATCHED
+    minimizers[minima >= options["FirstMatchMaxDist"] * num_samples] = CLID_UNMATCHED
 
     sort_idx[unmatched_idx] = minimizers
     match_idx[unmatched_idx] = minimizers
 
 
-def distance_groups(in1, in2, sign='pos'):
+def distance_groups(in1, in2, sign="pos"):
     """
     calculates a distance between mean spikes
     """
     dist = in1 - in2
 
-    if sign == 'pos':
+    if sign == "pos":
         dist /= min(in1.max(), in2.max())
-    elif sign == 'neg':
+    elif sign == "neg":
         dist /= max(in1.min(), in2.min())
     else:
-        raise Warning('Undefined sign: {}'.format(sign))
+        raise Warning("Undefined sign: {}".format(sign))
 
     l2_dist = np.sqrt((dist**2).sum())
     # return l2
     # purely heuristical metric!
     # should be optimized by someone...
     linf = np.abs(dist).max()
-    return (l2_dist + 7 * linf)/2
-
+    return (l2_dist + 7 * linf) / 2
 
 
 def get_means(classes, all_spikes):
@@ -111,8 +110,8 @@ def get_means(classes, all_spikes):
             ids.append(clid)
             means.append(meandata.mean(0))
             stds.append(np.sqrt(meandata.var(0).sum()))
-            if options['Debug']:
-                print('class {} has stdval: {:.3f}'.format(clid, stds[-1]))
+            if options["Debug"]:
+                print("class {} has stdval: {:.3f}".format(clid, stds[-1]))
 
     if not len(means):
         empty = np.array([])

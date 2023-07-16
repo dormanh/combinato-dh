@@ -15,16 +15,16 @@ class Backend(object):
     """
     gui sorter backend
     """
+
     def __del__(self):
-        print('Closing session')
+        print("Closing session")
         del self.sorting_manager
         del self.sessions
 
-    def __init__(self, datafilename, sessionfilename,
-                 start_time=0, stop_time=np.inf):
+    def __init__(self, datafilename, sessionfilename, start_time=0, stop_time=np.inf):
 
         self.sessions = None
-        print('Openening session {} {}'.format(datafilename, sessionfilename))
+        print("Openening session {} {}".format(datafilename, sessionfilename))
         self.folder = os.path.dirname(datafilename)
         self.datafile = os.path.basename(datafilename)
         self.sorting_manager = SortingManagerGrouped(datafilename)
@@ -32,19 +32,19 @@ class Backend(object):
 
         self.sign = self.sorting_manager.sign
 
-        start_idx, stop_idx = self.sorting_manager.\
-            get_start_stop_index(self.sign, start_time, stop_time)
+        start_idx, stop_idx = self.sorting_manager.get_start_stop_index(
+            self.sign, start_time, stop_time
+        )
 
-        print('Setting index {} to {}'.format(start_idx, stop_idx))
+        print("Setting index {} to {}".format(start_idx, stop_idx))
 
-        self.sorting_manager.\
-            set_sign_times_spikes(self.sign, start_idx, stop_idx)
+        self.sorting_manager.set_sign_times_spikes(self.sign, start_idx, stop_idx)
 
         self.x = np.arange(self.sorting_manager.get_samples_per_spike())
         self.sessions = Sessions(self)
         thresholds = self.sorting_manager.get_thresholds()
         if thresholds is not None:
-            if (thresholds[-1, 1] - thresholds[0, 0]) > 24*60*60*1000:
+            if (thresholds[-1, 1] - thresholds[0, 0]) > 24 * 60 * 60 * 1000:
                 thresholds[:, :2] /= 1e3  # this is necessary for some old files
         self.thresholds = thresholds
         self.original_start = start_time

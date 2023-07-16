@@ -6,8 +6,7 @@ from __future__ import print_function, division, absolute_import
 
 import numpy as np
 
-from PyQt5.QtCore import (QAbstractListModel, Qt, QModelIndex,
-        QSize, QPoint, QVariant)
+from PyQt5.QtCore import QAbstractListModel, Qt, QModelIndex, QSize, QPoint, QVariant
 from PyQt5.QtWidgets import QStyledItemDelegate, QStyle
 from PyQt5.QtGui import QPen
 from .. import options
@@ -17,6 +16,7 @@ class GroupListModel(QAbstractListModel):
     """
     represents a group of clusters
     """
+
     def __init__(self, name, groupId, clusters, group_type):
         super(GroupListModel, self).__init__()
         self.name = name
@@ -25,7 +25,7 @@ class GroupListModel(QAbstractListModel):
         self.group_type = group_type
         self.assignAxis = None
         self.densitydata = None
-        self.upto = options['compute_isi_upto_ms']
+        self.upto = options["compute_isi_upto_ms"]
         self.bins = None
         self.times = None
         self.meandata = None
@@ -47,12 +47,11 @@ class GroupListModel(QAbstractListModel):
         self.meandata = [c.meanspike for c in self.clusters]
 
         max_of_means = np.max(np.abs(self.meandata))
-        bins_density = np.linspace(-2*max_of_means,
-                                   2*max_of_means,
-                                   int(2*max_of_means))
+        bins_density = np.linspace(
+            -2 * max_of_means, 2 * max_of_means, int(2 * max_of_means)
+        )
 
-        density = [np.histogram(row, bins=bins_density)[0]
-                   for row in allspikes]
+        density = [np.histogram(row, bins=bins_density)[0] for row in allspikes]
 
         timelist = [c.times for c in self.clusters]
         self.times = np.concatenate(timelist)
@@ -87,13 +86,12 @@ class GroupListModel(QAbstractListModel):
         self.update()
 
     def __len__(self):
-        return(len(self.clusters))
+        return len(self.clusters)
 
     def data(self, index, role=Qt.DisplayRole):
-        if (not index.isValid() or
-            not (0 <= index.row() < len(self.clusters))):
+        if not index.isValid() or not (0 <= index.row() < len(self.clusters)):
             return QVariant()
-        
+
         if role == Qt.DisplayRole:
             # maybe some different information?
             cluster = self.clusters[index.row()]
@@ -109,7 +107,6 @@ class GroupListModel(QAbstractListModel):
 
 
 class ClusterDelegate(QStyledItemDelegate):
-
     def __init__(self, parent=None):
         super(ClusterDelegate, self).__init__(parent)
 
@@ -124,8 +121,8 @@ class ClusterDelegate(QStyledItemDelegate):
             painter.setPen(pen)
             painter.drawRect(option.rect.adjusted(+2, +2, -2, -2))
 
-        painter.drawPixmap(QPoint(option.rect.x() + 5, option.rect.y() + 5) , image)
+        painter.drawPixmap(QPoint(option.rect.x() + 5, option.rect.y() + 5), image)
         painter.restore()
 
     def sizeHint(self, option, index):
-        return(QSize(210, 210))
+        return QSize(210, 210)

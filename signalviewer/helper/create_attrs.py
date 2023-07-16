@@ -10,7 +10,7 @@ import os
 import tables
 import csv
 
-FNAME_OUT = 'h5meta.txt'
+FNAME_OUT = "h5meta.txt"
 
 
 def to_file(msg, outname):
@@ -18,8 +18,8 @@ def to_file(msg, outname):
     write h5information to file
     """
 
-    with open(outname, 'w') as fid:
-        writer = csv.writer(fid, delimiter=';')
+    with open(outname, "w") as fid:
+        writer = csv.writer(fid, delimiter=";")
         writer.writerows(msg)
     fid.close()
 
@@ -31,14 +31,16 @@ def make_attrs(h5files):
     msgs = []
 
     for fname in h5files:
-        fid = tables.open_file(fname, 'r')
+        fid = tables.open_file(fname, "r")
         attrs = fid.root.data.rawdata.attrs
         shortname = os.path.basename(fname)[:-6]
-        msg = [shortname,
-               attrs.AcqEntName, #.decode('utf-8'),
-               attrs.ADBitVolts * 1e6,
-               attrs.Q,
-               attrs.timestep * 1e6]
+        msg = [
+            shortname,
+            attrs.AcqEntName,  # .decode('utf-8'),
+            attrs.ADBitVolts * 1e6,
+            attrs.Q,
+            attrs.timestep * 1e6,
+        ]
         msgs.append(msg)
 
         fid.close()
@@ -52,12 +54,13 @@ def main():
     """
     from glob import glob
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
-    parser.add_argument('fnames', nargs='*')
+    parser.add_argument("fnames", nargs="*")
     args = parser.parse_args()
 
     if not args.fnames:
-        fnames = sorted(glob('*ds.h5'))
+        fnames = sorted(glob("*ds.h5"))
     else:
         fnames = args.fnames
 

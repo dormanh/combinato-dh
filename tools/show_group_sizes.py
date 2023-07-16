@@ -26,9 +26,11 @@ def main(sign, label):
         else:
             n_arti = 0
 
-
-        print('{} {} groups, {} artifacts'.
-              format(os.path.basename(fname), len(groups), n_arti))
+        print(
+            "{} {} groups, {} artifacts".format(
+                os.path.basename(fname), len(groups), n_arti
+            )
+        )
 
         n_arti_total += n_arti
 
@@ -36,5 +38,5 @@ def main(sign, label):
 
 
 if __name__ == "__main__":
-    ret = main('pos', 'sort_pos_joh')
-    print('Total artifacts: {}'.format(ret))
+    ret = main("pos", "sort_pos_joh")
+    print("Total artifacts: {}".format(ret))

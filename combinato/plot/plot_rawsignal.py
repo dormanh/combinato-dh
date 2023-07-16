@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#added comment JN 2014-12-07
+# added comment JN 2014-12-07
 """
 script generates overview figures *from ncs files* to give you a first
 impression of the data quality, movement artifacts and so on
@@ -18,22 +18,16 @@ from matplotlib.gridspec import GridSpec
 from .. import NcsFile, DefaultFilter, get_regions
 
 MINS = 2
-EVERY_MINS_MIN = 30 # difference can't be below this
-PLOTTIMES = (.5, 30, MINS*60) # in sec
+EVERY_MINS_MIN = 30  # difference can't be below this
+PLOTTIMES = (0.5, 30, MINS * 60)  # in sec
 Q = 1000
 DPI = 100
-FIGSIZE = (3.5, .5)
+FIGSIZE = (3.5, 0.5)
 FONTSIZE = 8
-OVERVIEW_NAME = 'overview'
-TEXT_BBOX = {'facecolor' : 'white', 'lw' : 0}
-GRID = GridSpec(1, 1,
-                left=.01,
-                right=.99,
-                top=.98,
-                bottom=.02,
-                hspace=0,
-                wspace=0)
-VERT_ALIGN = {1 : 'top', -1 : 'bottom'}
+OVERVIEW_NAME = "overview"
+TEXT_BBOX = {"facecolor": "white", "lw": 0}
+GRID = GridSpec(1, 1, left=0.01, right=0.99, top=0.98, bottom=0.02, hspace=0, wspace=0)
+VERT_ALIGN = {1: "top", -1: "bottom"}
 
 
 def overview_plot(channel):
@@ -46,37 +40,37 @@ def overview_plot(channel):
     plots = []
     fignames = []
 
-    print('Opening %s' % channel)
+    print("Opening %s" % channel)
     fid = NcsFile(channel)
     timestep = fid.timestep
-    total_time = fid.num_recs * 512 * timestep # in seconds
+    total_time = fid.num_recs * 512 * timestep  # in seconds
 
-    n_sessions = int(np.ceil(total_time/(60 * EVERY_MINS_MIN)))
+    n_sessions = int(np.ceil(total_time / (60 * EVERY_MINS_MIN)))
 
     if n_sessions < 10:
         n_sessions = 10
 
-    #basename = os.path.splitext(channel)[0]
+    # basename = os.path.splitext(channel)[0]
 
-    #if not os.path.isdir(basename):
+    # if not os.path.isdir(basename):
     #    os.mkdir(basename)
 
     if not os.path.isdir(OVERVIEW_NAME):
         os.mkdir(OVERVIEW_NAME)
 
     overview_tmp = OVERVIEW_NAME
-    #if not os.path.isdir(overview_tmp):
+    # if not os.path.isdir(overview_tmp):
     #    os.mkdir(overview_tmp)
 
-    timefactor = (512*timestep)/60
+    timefactor = (512 * timestep) / 60
 
-    voltfactor = fid.header['ADBitVolts'] * 1e6
-    entname = fid.header['AcqEntName']
+    voltfactor = fid.header["ADBitVolts"] * 1e6
+    entname = fid.header["AcqEntName"]
     cscname = os.path.basename(channel)[:-4]
     sessionstarts = np.array(np.linspace(0, fid.num_recs, n_sessions), dtype=int)
     fignames = []
     myfilter = DefaultFilter(timestep)
-    n_recs_load = int(MINS*60/(512*timestep))
+    n_recs_load = int(MINS * 60 / (512 * timestep))
 
     for i in range(3):
         fig = mpl.figure(figsize=FIGSIZE)
@@ -90,14 +84,14 @@ def overview_plot(channel):
         if stop >= fid.num_recs:
             start = fid.num_recs - n_recs_load - 1
             stop = fid.num_recs - 1
-        data = fid.read(start, stop, 'data').astype(np.float32)
+        data = fid.read(start, stop, "data").astype(np.float32)
         data *= voltfactor
 
         for i in range(3):
             plot = plots[i]
             plot.cla()
             ptime = PLOTTIMES[i]
-            n_samp = int(ptime/timestep)
+            n_samp = int(ptime / timestep)
 
             if i == 0:
                 pdata = data[:n_samp]
@@ -108,10 +102,10 @@ def overview_plot(channel):
             elif i == 2:
                 pdata = sig.decimate(data, Q, 4, zero_phase=False)
 
-            x = np.arange(pdata.shape[0])*timestep
+            x = np.arange(pdata.shape[0]) * timestep
 
             if i == 2:
-                x *= Q/60
+                x *= Q / 60
 
             plot.plot(x, pdata)
 
@@ -124,54 +118,62 @@ def overview_plot(channel):
 
             plot.set_ylim((-ylim, ylim))
             plot.set_xticklabels([])
-            plot.grid(True, axis='x')
+            plot.grid(True, axis="x")
             plot.set_yticks((-ylim, 0, ylim))
 
             if sescount == 0:
                 if i == 0:
-                    text = '{} {} {:.2f} s raw'.format(entname,
-                                                       cscname,
-                                                       PLOTTIMES[0])
+                    text = "{} {} {:.2f} s raw".format(entname, cscname, PLOTTIMES[0])
                 else:
-                    text = '{:.0f} s'.format(PLOTTIMES[i])
+                    text = "{:.0f} s".format(PLOTTIMES[i])
 
                 if i == 1:
-                    text += ' bandpassed'
+                    text += " bandpassed"
                 elif i == 2:
-                    text += ' raw'
+                    text += " raw"
 
                 xpos = x[-1]
-                ypos = ylim*.96
+                ypos = ylim * 0.96
                 for sign in (1, -1):
-                    plot.text(xpos, sign*ypos, str(sign*ylim) + u' µV', fontsize=FONTSIZE,
-                              bbox=TEXT_BBOX, ha='right', va=VERT_ALIGN[sign])
+                    plot.text(
+                        xpos,
+                        sign * ypos,
+                        str(sign * ylim) + " µV",
+                        fontsize=FONTSIZE,
+                        bbox=TEXT_BBOX,
+                        ha="right",
+                        va=VERT_ALIGN[sign],
+                    )
             else:
                 plot.set_yticklabels([])
-                text = '{:.0f} min'.format(start * timefactor)
+                text = "{:.0f} min".format(start * timefactor)
 
-            xpos = x[-1]*.02
-            ypos = ylim * .55
-            plot.text(xpos, ypos, text, fontsize=FONTSIZE,
-                      bbox=TEXT_BBOX)
+            xpos = x[-1] * 0.02
+            ypos = ylim * 0.55
+            plot.text(xpos, ypos, text, fontsize=FONTSIZE, bbox=TEXT_BBOX)
 
-
-            figname = '{}_{:1d}_{:03d}.png'.format(entname, i, sescount)
+            figname = "{}_{:1d}_{:03d}.png".format(entname, i, sescount)
             figpath = os.path.join(overview_tmp, figname)
             fignames.append(figpath)
             figs[i].savefig(figpath, DPI=DPI)
 
-    mpl.close('all')
+    mpl.close("all")
 
-    arg = ['montage', '-tile', '3', '-geometry',
-           '{}x{}'.format(FIGSIZE[0]*DPI, FIGSIZE[1]*DPI)] + fignames
+    arg = [
+        "montage",
+        "-tile",
+        "3",
+        "-geometry",
+        "{}x{}".format(FIGSIZE[0] * DPI, FIGSIZE[1] * DPI),
+    ] + fignames
 
-    outname = os.path.join('overview',
-                           'overview_{}_{}.png'.format(entname, cscname))
+    outname = os.path.join("overview", "overview_{}_{}.png".format(entname, cscname))
     arg.append(outname)
     subprocess.call(arg)
     for figname in fignames:
         os.remove(figname)
-    print('Completed ' + entname)
+    print("Completed " + entname)
+
 
 def main():
     t = time.time()
@@ -187,4 +189,4 @@ def main():
         for ch in channels:
             overview_plot(ch)
 
-    print('Plotting took {:.0f} seconds'.format(time.time() - t))
+    print("Plotting took {:.0f} seconds".format(time.time() - t))

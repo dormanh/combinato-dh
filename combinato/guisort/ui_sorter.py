@@ -14,7 +14,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1096, 572)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
@@ -34,7 +36,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.verticalLayout_2.addLayout(self.verticalLayout_6)
         self.mainSplitter = QtWidgets.QSplitter(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.mainSplitter.sizePolicy().hasHeightForWidth())
@@ -50,10 +54,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.groupComboBox = QtWidgets.QComboBox(self.layoutWidget)
         self.groupComboBox.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupComboBox.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.groupComboBox.sizePolicy().hasHeightForWidth()
+        )
         self.groupComboBox.setSizePolicy(sizePolicy)
         self.groupComboBox.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
         self.groupComboBox.setObjectName("groupComboBox")
@@ -72,7 +80,9 @@ class Ui_MainWindow(object):
         self.singleRadioButton.setObjectName("singleRadioButton")
         self.buttonGroup.addButton(self.singleRadioButton)
         self.horizontalLayout.addWidget(self.singleRadioButton)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.listView = QtWidgets.QListView(self.layoutWidget)
@@ -91,7 +101,9 @@ class Ui_MainWindow(object):
         self.pushButtonSave = QtWidgets.QPushButton(self.oneGroupTab)
         self.pushButtonSave.setObjectName("pushButtonSave")
         self.horizontalLayout_3.addWidget(self.pushButtonSave)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_3.addItem(spacerItem1)
         self.verticalLayout_5.addLayout(self.horizontalLayout_3)
         self.oneGroupLayout = QtWidgets.QVBoxLayout()
@@ -110,7 +122,9 @@ class Ui_MainWindow(object):
         self.pushButtonTidy = QtWidgets.QPushButton(self.allGroupsTab)
         self.pushButtonTidy.setObjectName("pushButtonTidy")
         self.horizontalLayout_2.addWidget(self.pushButtonTidy)
-        spacerItem2 = QtWidgets.QSpacerItem(168, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            168, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_2.addItem(spacerItem2)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.allGroupsLayout = QtWidgets.QVBoxLayout()
@@ -141,7 +155,9 @@ class Ui_MainWindow(object):
         self.pushButtonMerge = QtWidgets.QPushButton(self.compareTab)
         self.pushButtonMerge.setObjectName("pushButtonMerge")
         self.horizontalLayout_4.addWidget(self.pushButtonMerge)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_4.addItem(spacerItem3)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.compareFigureLayout = QtWidgets.QVBoxLayout()
@@ -165,7 +181,9 @@ class Ui_MainWindow(object):
         self.lineEditStimSelect.setEnabled(False)
         self.lineEditStimSelect.setObjectName("lineEditStimSelect")
         self.horizontalLayout_5.addWidget(self.lineEditStimSelect)
-        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_5.addItem(spacerItem4)
         self.verticalLayout_8.addLayout(self.horizontalLayout_5)
         self.rasterLayout = QtWidgets.QVBoxLayout()
@@ -253,18 +271,29 @@ class Ui_MainWindow(object):
         self.multiRadioButton.setText(_translate("MainWindow", "MU"))
         self.singleRadioButton.setText(_translate("MainWindow", "SU"))
         self.pushButtonSave.setText(_translate("MainWindow", "Save Image"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.oneGroupTab), _translate("MainWindow", "One Group"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.oneGroupTab),
+            _translate("MainWindow", "One Group"),
+        )
         self.autoassignPushButton.setText(_translate("MainWindow", "Autoassign"))
         self.pushButtonTidy.setText(_translate("MainWindow", "Tidy"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.allGroupsTab), _translate("MainWindow", "All Groups"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.allGroupsTab),
+            _translate("MainWindow", "All Groups"),
+        )
         self.compareOneLabel.setText(_translate("MainWindow", "Group 1"))
         self.compareTwoLabel.setText(_translate("MainWindow", "Group 2"))
         self.comparePlotpushButton.setText(_translate("MainWindow", "Plot"))
         self.pushButtonMerge.setText(_translate("MainWindow", "Merge"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.compareTab), _translate("MainWindow", "Correlations"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.compareTab),
+            _translate("MainWindow", "Correlations"),
+        )
         self.pushButtonUpdateRasters.setText(_translate("MainWindow", "Update"))
         self.label.setText(_translate("MainWindow", "Paradigm"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.rastersTab), _translate("MainWindow", "Rasters"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.rastersTab), _translate("MainWindow", "Rasters")
+        )
         self.menuFile.setTitle(_translate("MainWindow", "&File"))
         self.menuGroup.setTitle(_translate("MainWindow", "&Actions"))
         self.actionSave.setText(_translate("MainWindow", "&Save"))
@@ -286,7 +315,9 @@ class Ui_MainWindow(object):
         self.actionNewGroup.setShortcut(_translate("MainWindow", "Ctrl+N"))
         self.actionAutoassign.setText(_translate("MainWindow", "Autoassign"))
         self.actionAutoassign.setShortcut(_translate("MainWindow", "G"))
-        self.actionActionGroupArtifact.setText(_translate("MainWindow", "actionGroupArtifact"))
+        self.actionActionGroupArtifact.setText(
+            _translate("MainWindow", "actionGroupArtifact")
+        )
         self.actionOpen.setText(_translate("MainWindow", "&Open"))
         self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O"))
         self.actionOpenJobs.setText(_translate("MainWindow", "Open &Jobs"))
@@ -297,8 +328,12 @@ class Ui_MainWindow(object):
         self.actionGotoJob.setText(_translate("MainWindow", "&Goto Job"))
         self.actionMerge.setText(_translate("MainWindow", "Merge"))
         self.actionUpdateRasters.setText(_translate("MainWindow", "updateRasters"))
-        self.actionMerge_one_unit_groups.setText(_translate("MainWindow", "Merge if just &1 cluster"))
+        self.actionMerge_one_unit_groups.setText(
+            _translate("MainWindow", "Merge if just &1 cluster")
+        )
         self.actionMerge_one_unit_groups.setShortcut(_translate("MainWindow", "Ctrl+1"))
         self.actionTidyGroups.setText(_translate("MainWindow", "tidyGroups"))
-        self.actionSave_to_Matfile.setText(_translate("MainWindow", "Export times to matfile"))
+        self.actionSave_to_Matfile.setText(
+            _translate("MainWindow", "Export times to matfile")
+        )
         self.actionSave_to_Matfile.setShortcut(_translate("MainWindow", "Ctrl+E"))

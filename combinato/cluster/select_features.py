@@ -6,12 +6,13 @@ import numpy as np
 import scipy.stats as stats
 from .. import options
 
+
 def select_features(features):
     """
     select the features that go into sorting
     """
-    factor = options['feature_factor']
-    num_features_out = options['nFeatures']
+    factor = options["feature_factor"]
+    num_features_out = options["nFeatures"]
 
     num_features = features.shape[1]
 
@@ -28,7 +29,7 @@ def select_features(features):
             good_features = features[idx, i]
             good_features = good_features - good_features.mean()
             good_features /= good_features.std()
-            scores[i] = stats.kstest(good_features, 'norm')[1]
+            scores[i] = stats.kstest(good_features, "norm")[1]
 
     sorted_scores = np.sort(scores)
     border = sorted_scores[num_features_out]
@@ -40,9 +41,9 @@ def select_features(features):
 # test it
 if __name__ == "__main__":
     data = np.random.normal(size=(1000, 64))
-    data[:, [2, 4, 6]] = 1 # induce non-normality
+    data[:, [2, 4, 6]] = 1  # induce non-normality
     features = select_features(data)
     for i in [2, 4, 6]:
         assert i in features
 
-    print('OK, features: ', features)
+    print("OK, features: ", features)

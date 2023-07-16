@@ -1,7 +1,7 @@
 # JN 2016-01-22
 from __future__ import absolute_import
 
-DATE_FNAME = 'start_stop_datetime.txt'
+DATE_FNAME = "start_stop_datetime.txt"
 
 from .helper.create_attrs import make_attrs
 from .helper.helper import parse_datetime

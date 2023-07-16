@@ -5,7 +5,7 @@ from collections import defaultdict
 from multiprocessing import Process, Queue, Value
 import numpy as np
 
-np.seterr(all='raise')
+np.seterr(all="raise")
 
 import tables
 from .. import DefaultFilter
@@ -18,7 +18,7 @@ def save(q, ctarget):
     openfiles = {}
     saved = 0
     pending_jobs = defaultdict(dict)
-    last_saved_count = defaultdict(lambda : -1)
+    last_saved_count = defaultdict(lambda: -1)
     all_data = []
 
     while saved < ctarget:
@@ -31,38 +31,39 @@ def save(q, ctarget):
         all_data.append(datatuple)
         job.update(all_data_ind=ind)
 
-        jname = job['name']
+        jname = job["name"]
         this_name_pending_jobs = pending_jobs[jname]
 
-        jcount = job['count']
+        jcount = job["count"]
         this_name_pending_jobs[jcount] = job
 
-
-        print('Job name: {} pending jobs: {} jnow: {}'.format(jname,
-                                                              this_name_pending_jobs.keys(),
-                                                              jcount))
+        print(
+            "Job name: {} pending jobs: {} jnow: {}".format(
+                jname, this_name_pending_jobs.keys(), jcount
+            )
+        )
 
         while last_saved_count[jname] + 1 in this_name_pending_jobs:
             sjob = this_name_pending_jobs[last_saved_count[jname] + 1]
-            data = all_data[sjob['all_data_ind']]
-            if not sjob['name'] in openfiles:
+            data = all_data[sjob["all_data_ind"]]
+            if not sjob["name"] in openfiles:
 
-                 spoints = data[0][0].shape[1]
-                 openfiles[sjob['name']] = OutFile(sjob['name'], sjob['filename'],
-                                                   spoints, sjob['destination'])
+                spoints = data[0][0].shape[1]
+                openfiles[sjob["name"]] = OutFile(
+                    sjob["name"], sjob["filename"], spoints, sjob["destination"]
+                )
 
-            print('saving {}, count {}'.format(sjob['name'], sjob['count']))
-            openfiles[sjob['name']].write(data)
-            all_data[sjob['all_data_ind']] = None
-            last_saved_count[jname] = sjob['count']
-            del this_name_pending_jobs[sjob['count']]
+            print("saving {}, count {}".format(sjob["name"], sjob["count"]))
+            openfiles[sjob["name"]].write(data)
+            all_data[sjob["all_data_ind"]] = None
+            last_saved_count[jname] = sjob["count"]
+            del this_name_pending_jobs[sjob["count"]]
             saved += 1
-
 
     for fid in openfiles.values():
         fid.close()
 
-    print('Save exited')
+    print("Save exited")
 
 
 def work(q_in, q_out, count, target):
@@ -83,13 +84,11 @@ def work(q_in, q_out, count, target):
 
         filt = filters[ts]
 
-        result = extract_spikes(datatuple[0],
-                                datatuple[1],
-                                ts,  filt)
+        result = extract_spikes(datatuple[0], datatuple[1], ts, filt)
 
         q_out.put((job, result))
 
-    print('Work exited')
+    print("Work exited")
 
 
 def read(jobs, q):
@@ -99,54 +98,52 @@ def read(jobs, q):
     openfiles = {}
 
     for job in jobs:
-        jname = job['name']
+        jname = job["name"]
 
-        if ('is_h5file' in job.keys()) and job['is_h5file']:
+        if ("is_h5file" in job.keys()) and job["is_h5file"]:
             if jname not in openfiles:
-                openfiles[jname] = tables.open_file(job['filename'], 'r')
+                openfiles[jname] = tables.open_file(job["filename"], "r")
 
             if openfiles[jname].root.data.ndim == 1:
-                fdata = openfiles[jname].root.data[job['start']:job['stop']]
+                fdata = openfiles[jname].root.data[job["start"] : job["stop"]]
             else:
-                raise Warning('Data has wrong number of dimensions')
+                raise Warning("Data has wrong number of dimensions")
             fdata = fdata.ravel()
-            if 'sr' in openfiles[jname].root.__members__:
+            if "sr" in openfiles[jname].root.__members__:
                 sr = openfiles[jname].root.sr[0]
             else:
-                sr = 32000.
-            ts = 1/sr
+                sr = 32000.0
+            ts = 1 / sr
             # here we need to shift the data according to job['start']
-            atimes = np.linspace(0, fdata.shape[0]/(sr/1000), fdata.shape[0])
-            atimes += job['start']/(sr/1000)
+            atimes = np.linspace(0, fdata.shape[0] / (sr / 1000), fdata.shape[0])
+            atimes += job["start"] / (sr / 1000)
             data = (fdata, atimes, ts)
- 
-            job.update(filename='data_' + jname + '.h5')
 
+            job.update(filename="data_" + jname + ".h5")
 
-        elif 'is_matfile' in job.keys():
-            if job['is_matfile']:
-                fname = job['filename']
-                print('Reading from matfile ' + fname)
+        elif "is_matfile" in job.keys():
+            if job["is_matfile"]:
+                fname = job["filename"]
+                print("Reading from matfile " + fname)
                 data = read_matfile(fname)
-                if job['scale_factor'] != 1:
-                    print('Rescaling matfile data by {:.4f}'.
-                        format(job['scale_factor']))
-                    data = (data[0] * job['scale_factor'],
-                            data[1],
-                            data[2])
-                job.update(filename='data_' + jname + '.h5')
+                if job["scale_factor"] != 1:
+                    print(
+                        "Rescaling matfile data by {:.4f}".format(job["scale_factor"])
+                    )
+                    data = (data[0] * job["scale_factor"], data[1], data[2])
+                job.update(filename="data_" + jname + ".h5")
 
         else:
             if jname not in openfiles:
-                openfiles[jname] = ExtractNcsFile(job['filename'], job['reference'])
+                openfiles[jname] = ExtractNcsFile(job["filename"], job["reference"])
 
-            print('Read {} {: 7d} {: 7d}'.format(jname, job['start'], job['stop']))
-            data = openfiles[jname].read(job['start'], job['stop'])
-            job.update(filename='data_' + jname + '.h5')
+            print("Read {} {: 7d} {: 7d}".format(jname, job["start"], job["stop"]))
+            data = openfiles[jname].read(job["start"], job["stop"])
+            job.update(filename="data_" + jname + ".h5")
 
         q.put((job, data))
 
-    print('Read exited')
+    print("Read exited")
 
 
 def mp_extract(jobs, nWorkers):
@@ -154,7 +151,7 @@ def mp_extract(jobs, nWorkers):
     procs = []
 
     ctarget = len(jobs)
-    count = Value('i', 0)
+    count = Value("i", 0)
 
     q_read = Queue(5)
     q_work = Queue()

@@ -9,10 +9,12 @@ from .cluster import Cluster
 from .group_list_model import GroupListModel
 from .. import GROUP_ART, GROUP_NOCLASS, TYPE_MU, TYPE_ART, TYPE_NO
 
+
 class Sessions(object):
     """
     represents a collection of opened sessions
     """
+
     def __init__(self, parent=None):
         self.dirty = False
         self.sorting_manager = parent.sorting_manager
@@ -33,15 +35,14 @@ class Sessions(object):
         groups = self.sorting_manager.get_groups()
 
         if GROUP_ART not in groups:
-            print('Adding empty artifact group')
-            model = GroupListModel('Artifacts', GROUP_ART, [], TYPE_ART)
+            print("Adding empty artifact group")
+            model = GroupListModel("Artifacts", GROUP_ART, [], TYPE_ART)
             self.groupsById[GROUP_ART] = model
-            self.type_table = np.vstack(([GROUP_ART, TYPE_ART],
-                                         self.type_table))
+            self.type_table = np.vstack(([GROUP_ART, TYPE_ART], self.type_table))
 
         if GROUP_NOCLASS not in groups:
-            print('Adding empty noclass group')
-            model = GroupListModel('Unassigned', GROUP_NOCLASS, [], TYPE_NO)
+            print("Adding empty noclass group")
+            model = GroupListModel("Unassigned", GROUP_NOCLASS, [], TYPE_NO)
             self.groupsById[GROUP_NOCLASS] = model
 
         for gid, data in groups.items():
@@ -52,9 +53,9 @@ class Sessions(object):
             group_type = self.sorting_manager.get_group_type(gid)
 
             if gid == GROUP_ART:
-                name = 'Artifacts'
+                name = "Artifacts"
             elif gid == GROUP_NOCLASS:
-                name = 'Unassigned'
+                name = "Unassigned"
             else:
                 name = str(gid)
 
@@ -62,9 +63,9 @@ class Sessions(object):
             tmp_clusters = []
 
             for clid, clus in data.items():
-                times = clus['times']
-                spikes = clus['spikes']
-                fname = clus['image']
+                times = clus["times"]
+                spikes = clus["spikes"]
+                fname = clus["image"]
                 clu = Cluster(clid, fname, spikes, times)
                 tmp_clusters.append(clu)
                 self.start_time = min(self.start_time, times[0])
@@ -95,8 +96,7 @@ class Sessions(object):
                 idx_cl = self.group_table[:, 0] == cluster.name
                 self.group_table[idx_cl, 1] = group_id
 
-        self.sorting_manager.save_groups_and_types(self.group_table,
-                                                   self.type_table)
+        self.sorting_manager.save_groups_and_types(self.group_table, self.type_table)
 
     def newGroup(self):
 
@@ -104,9 +104,10 @@ class Sessions(object):
 
         for newkey in range(1, 1000):
             if newkey not in keys:
-                self.groupsById[newkey] = GroupListModel(str(newkey),
-                                                         newkey, [], TYPE_MU)
-                print('Added group {}'.format(newkey))
+                self.groupsById[newkey] = GroupListModel(
+                    str(newkey), newkey, [], TYPE_MU
+                )
+                print("Added group {}".format(newkey))
                 break
 
         self.type_table = np.vstack((self.type_table, [newkey, TYPE_MU]))
@@ -118,7 +119,7 @@ class Sessions(object):
         rename groups by group size, delete empty groups
         """
         # get group sizes
-        sizes = [] 
+        sizes = []
         for gid, group in self.groupsById.items():
             if gid not in (GROUP_ART, GROUP_NOCLASS):
                 sz = len(group.times)
@@ -133,7 +134,7 @@ class Sessions(object):
         for pre_new_gid, (size, gid) in enumerate(sizes):
             new_gid = pre_new_gid + 1
             print("{} -> {} ({})".format(gid, new_gid, size))
-            group = self.groupsById[gid] 
+            group = self.groupsById[gid]
             group.name = str(new_gid)
             group.groupId = new_gid
             new_groups[new_gid] = group
@@ -150,5 +151,5 @@ class Sessions(object):
                 temp[:, 0] = group.times
                 all_output.append(temp)
 
-        out = {'group_times': np.vstack(all_output)}
-        savemat(fname, out) 
+        out = {"group_times": np.vstack(all_output)}
+        savemat(fname, out)

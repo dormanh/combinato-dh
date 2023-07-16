@@ -2,13 +2,12 @@
 from __future__ import print_function, division, absolute_import
 
 import os
-from PyQt5.QtWidgets import (QDialog, QDialogButtonBox,
-    QListWidget, QVBoxLayout, QLabel)
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QListWidget, QVBoxLayout, QLabel
 
 from .. import get_relevant_folders, get_time_files
 
-POS_FNAME = 'do_manual_pos.txt'
-NEG_FNAME = 'do_manual_neg.txt'
+POS_FNAME = "do_manual_pos.txt"
+NEG_FNAME = "do_manual_neg.txt"
 
 
 class PickJobList(QDialog):
@@ -28,7 +27,7 @@ class PickJobList(QDialog):
         labels = sorted(set([item[2] for item in items]))
 
         items = get_time_files(folder)
-        timefiles = ['{} {} {}'.format(*item) for item in items]
+        timefiles = ["{} {} {}".format(*item) for item in items]
 
         self.labelList = QListWidget()
         self.labelList.addItems(labels)
@@ -39,12 +38,11 @@ class PickJobList(QDialog):
         self.jobfileList.setCurrentRow(0)
 
         self.timesList = QListWidget()
-        self.timesList.addItem('All')
+        self.timesList.addItem("All")
         self.timesList.addItems(timefiles)
         self.timesList.setCurrentRow(0)
 
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok |
-                                     QDialogButtonBox.Cancel)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttonBox.setShortcutEnabled(True)
 
         layout = QVBoxLayout()
@@ -71,12 +69,11 @@ class GotoJob(QDialog):
         super(GotoJob, self).__init__(parent)
 
         self.joblist = QListWidget()
-        items = ['{} {}'.format(i, name) for i, name in enumerate(jobs)]
+        items = ["{} {}".format(i, name) for i, name in enumerate(jobs)]
         self.joblist.addItems(items)
         self.joblist.setCurrentRow(0)
 
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok |
-                                     QDialogButtonBox.Cancel)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttonBox.setShortcutEnabled(True)
 
         layout = QVBoxLayout()

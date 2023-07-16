@@ -9,10 +9,10 @@ from scipy.signal import ellip, filtfilt
 
 # pylint:   disable=invalid-name, unbalanced-tuple-unpacking, E1101
 
-DETECT_LOW = 300        # default 300
-DETECT_HIGH = 1000      # default 1000
-EXTRACT_LOW = 300       # default 300
-EXTRACT_HIGH = 3000     # default 3000
+DETECT_LOW = 300  # default 300
+DETECT_HIGH = 1000  # default 1000
+EXTRACT_LOW = 300  # default 300
+EXTRACT_HIGH = 3000  # default 3000
 
 
 class DefaultFilter(object):
@@ -21,19 +21,25 @@ class DefaultFilter(object):
     """
 
     def __init__(self, timestep):
-        self.sampling_rate = int(1. / timestep)
+        self.sampling_rate = int(1.0 / timestep)
         self.timestep = timestep
-        self.c_detect = ellip(2, .1, 40,
-                              (2 * timestep * DETECT_LOW,
-                               2 * timestep * DETECT_HIGH),
-                              'bandpass')
-        self.c_extract = ellip(2, .1, 40,
-                               (2 * timestep * EXTRACT_LOW,
-                                2 * timestep * EXTRACT_HIGH),
-                               'bandpass')
-        self.c_notch = ellip(2, .5, 20,
-                             (2 * timestep * 1999, 2 * timestep * 2001),
-                             'bandstop')
+        self.c_detect = ellip(
+            2,
+            0.1,
+            40,
+            (2 * timestep * DETECT_LOW, 2 * timestep * DETECT_HIGH),
+            "bandpass",
+        )
+        self.c_extract = ellip(
+            2,
+            0.1,
+            40,
+            (2 * timestep * EXTRACT_LOW, 2 * timestep * EXTRACT_HIGH),
+            "bandpass",
+        )
+        self.c_notch = ellip(
+            2, 0.5, 20, (2 * timestep * 1999, 2 * timestep * 2001), "bandstop"
+        )
 
     def filter_detect(self, x):
         """

@@ -11,30 +11,49 @@ import sys
 import os
 
 from PyQt5.QtCore import QModelIndex, QSize, QItemSelectionModel
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QLabel, QSizePolicy,
-        QMessageBox)
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QSizePolicy, QMessageBox
 from PyQt5.QtGui import QPixmap, QImage
 
 from .ui_guioverview import Ui_MainWindow
-from .model import (ChannelTableModel, DO_SORT_STR_POS,
-                    DO_SORT_STR_NEG, DO_EXTRACT_STR, DONE_STR,
-                    SORT_MANUAL_STR_POS, SORT_MANUAL_STR_NEG,
-                    DROP_STR_POS, DROP_STR_NEG, SIGNAL, POSITIVE,
-                    NEGATIVE, SORTED_POS_IM, SORTED_NEG_IM)
+from .model import (
+    ChannelTableModel,
+    DO_SORT_STR_POS,
+    DO_SORT_STR_NEG,
+    DO_EXTRACT_STR,
+    DONE_STR,
+    SORT_MANUAL_STR_POS,
+    SORT_MANUAL_STR_NEG,
+    DROP_STR_POS,
+    DROP_STR_NEG,
+    SIGNAL,
+    POSITIVE,
+    NEGATIVE,
+    SORTED_POS_IM,
+    SORTED_NEG_IM,
+)
 
 from .. import get_channels, check_status, options
+
 DEBUG = False
 
 SCROLL_AREA_MIN_WIDTH = 50
 TABLE_HEIGHT = 50
-IMAGE_LABELS = ['None', 'Continuous', 'Pos. spikes', 'Neg. spikes',
-                'Sorted pos. spikes', 'Sorted neg. spikes']
-IMG_BY_LABEL = {'None': None,
-                'Continuous': SIGNAL,
-                'Pos. spikes': POSITIVE,
-                'Neg. spikes': NEGATIVE,
-                'Sorted pos. spikes': SORTED_POS_IM,
-                'Sorted neg. spikes': SORTED_NEG_IM}
+IMAGE_LABELS = [
+    "None",
+    "Continuous",
+    "Pos. spikes",
+    "Neg. spikes",
+    "Sorted pos. spikes",
+    "Sorted neg. spikes",
+]
+IMG_BY_LABEL = {
+    "None": None,
+    "Continuous": SIGNAL,
+    "Pos. spikes": POSITIVE,
+    "Neg. spikes": NEGATIVE,
+    "Sorted pos. spikes": SORTED_POS_IM,
+    "Sorted neg. spikes": SORTED_NEG_IM,
+}
 
 
 def load_image(path, entity, fname, img_type, sign=None, label=None):
@@ -43,15 +62,15 @@ def load_image(path, entity, fname, img_type, sign=None, label=None):
     simple image loading helper
     """
     fname_base = os.path.splitext(fname)[0]
-    pattern = img_type + '_' + entity + '_' + fname_base
+    pattern = img_type + "_" + entity + "_" + fname_base
 
     if sign is not None:
-        pattern += '_' + sign
+        pattern += "_" + sign
 
     if label is not None:
-        pattern += '_' + label
+        pattern += "_" + label
 
-    pattern += '.png'
+    pattern += ".png"
 
     path_pattern = os.path.join(path, pattern)
     image = None
@@ -59,11 +78,11 @@ def load_image(path, entity, fname, img_type, sign=None, label=None):
     if os.path.exists(path_pattern):
         image = QPixmap(QImage(path_pattern))
     else:
-        print(path_pattern + ' does not exist')
-        
+        print(path_pattern + " does not exist")
+
     if DEBUG:
         if image is not None:
-            print('Loaded ' + path_pattern)
+            print("Loaded " + path_pattern)
 
     return image
 
@@ -72,6 +91,7 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
     """
     main window of channel overview program
     """
+
     def __init__(self, parent=None):
         super(GuiOverview, self).__init__(parent)
         self.setupUi(self)
@@ -112,10 +132,8 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         self.label = None
 
     def set_actions(self):
-        self.tableViewChannels.selectionModel().\
-            currentChanged.connect(self.item_action)
-        self.action_Initialize_from_current_folder.\
-            triggered.connect(self.init_from_cwd)
+        self.tableViewChannels.selectionModel().currentChanged.connect(self.item_action)
+        self.action_Initialize_from_current_folder.triggered.connect(self.init_from_cwd)
         # self.actionFitHeight.triggered.connect(self.react_fit_height)
         # self.actionFitWidth.triggered.connect(self.react_fit_width)
         # self.action_1_1.triggered.connect(self.react_1_1)
@@ -126,15 +144,12 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         self.action_Previous_channel.triggered.connect(self.goto_previous)
         self.actionSave_actions_to_file.triggered.connect(self.print_all)
         self.actionOne_Down.triggered.connect(self.goto_next)
-        self.actionToggle_sorted_positive.\
-            triggered.connect(self.toggle_sorted_pos)
-        self.actionToggle_sorted_negative.\
-            triggered.connect(self.toggle_sorted_neg)
+        self.actionToggle_sorted_positive.triggered.connect(self.toggle_sorted_pos)
+        self.actionToggle_sorted_negative.triggered.connect(self.toggle_sorted_neg)
 
         # image selection
         self.comboBoxLeftImage.currentIndexChanged.connect(self.set_image_left)
-        self.comboBoxRightImage.currentIndexChanged.\
-            connect(self.set_image_right)
+        self.comboBoxRightImage.currentIndexChanged.connect(self.set_image_right)
 
     def init_from_cwd(self):
         """
@@ -145,11 +160,10 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         # relayout
         top_visible = 50  # px
         vsizes = self.splitter_2.sizes()
-        self.splitter_2.setSizes([top_visible,
-                                  sum(vsizes) - top_visible])
+        self.splitter_2.setSizes([top_visible, sum(vsizes) - top_visible])
 
         hsizes = self.splitter.sizes()
-        left_space = int(sum(hsizes) * .6)
+        left_space = int(sum(hsizes) * 0.6)
         self.splitter.setSizes([left_space, sum(hsizes) - left_space])
 
     def init_from_path(self, path):
@@ -166,8 +180,7 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         from_h5files = self.checkBoxInitH5.isChecked()
         channels = get_channels(path, from_h5files)
 
-
-        dirname_overview = os.path.join(path, 'overview')
+        dirname_overview = os.path.join(path, "overview")
         has_overview = os.path.isdir(dirname_overview)
 
         sorted_channels = sorted(channels)
@@ -181,41 +194,33 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
             channel_fname = channels[chname]
 
             if from_h5files:
-                load_chname = 'unknown'
+                load_chname = "unknown"
             else:
                 load_chname = chname
 
             if self.checkBoxSetStates.isChecked():
-                ch_ex, n_pos, n_neg, n_sorted, h5fname =\
-                    check_status(channel_fname)
+                ch_ex, n_pos, n_neg, n_sorted, h5fname = check_status(channel_fname)
             else:
-                ch_ex = True 
+                ch_ex = True
                 n_pos = n_neg = n_sorted = 0
                 h5fname = None
 
-
             if has_overview:
-                ch_overview_image = load_image(dirname_overview,
-                                               load_chname,
-                                               channel_fname, 'overview')
-                ch_spikes_image_pos = load_image(dirname_overview,
-                                                 load_chname,
-                                                 channel_fname,
-                                                 'spikes', 'pos')
-                ch_spikes_image_neg = load_image(dirname_overview,
-                                                 load_chname,
-                                                 channel_fname,
-                                                 'spikes', 'neg')
-                ch_sorted_image_pos = load_image(dirname_overview,
-                                                 load_chname,
-                                                 channel_fname,
-                                                 'sorted',
-                                                 'pos', label)
-                ch_sorted_image_neg = load_image(dirname_overview,
-                                                 load_chname,
-                                                 channel_fname,
-                                                 'sorted',
-                                                 'neg', label)
+                ch_overview_image = load_image(
+                    dirname_overview, load_chname, channel_fname, "overview"
+                )
+                ch_spikes_image_pos = load_image(
+                    dirname_overview, load_chname, channel_fname, "spikes", "pos"
+                )
+                ch_spikes_image_neg = load_image(
+                    dirname_overview, load_chname, channel_fname, "spikes", "neg"
+                )
+                ch_sorted_image_pos = load_image(
+                    dirname_overview, load_chname, channel_fname, "sorted", "pos", label
+                )
+                ch_sorted_image_neg = load_image(
+                    dirname_overview, load_chname, channel_fname, "sorted", "neg", label
+                )
 
             else:
                 ch_overview_image = None
@@ -242,31 +247,33 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
             sorted_str_pos = DONE_STR
             sorted_str_neg = DONE_STR
 
-            row = [chname,
-                   channels[chname],
-                   n_pos,
-                   n_neg,
-                   n_sorted,
-                   ex_str,
-                   sort_str,
-                   sort_str_neg,
-                   sorted_str_pos,
-                   sorted_str_neg,
-                   ch_overview_image,
-                   ch_spikes_image_pos,
-                   ch_spikes_image_neg,
-                   ch_sorted_image_pos,
-                   ch_sorted_image_neg,
-                   h5fname]
+            row = [
+                chname,
+                channels[chname],
+                n_pos,
+                n_neg,
+                n_sorted,
+                ex_str,
+                sort_str,
+                sort_str_neg,
+                sorted_str_pos,
+                sorted_str_neg,
+                ch_overview_image,
+                ch_spikes_image_pos,
+                ch_spikes_image_neg,
+                ch_sorted_image_pos,
+                ch_sorted_image_neg,
+                h5fname,
+            ]
             self.channelmodel.add_row(row)
         self.initialized = True
 
-#    def new_resize_event(self, ev):
-#        """
-#        just a helper
-#        """
-#        if None not in  (self.image_to_show_left, self.image_to_show_right):
-#            self.set_sizes()
+    #    def new_resize_event(self, ev):
+    #        """
+    #        just a helper
+    #        """
+    #        if None not in  (self.image_to_show_left, self.image_to_show_right):
+    #            self.set_sizes()
 
     def item_action(self, index=QModelIndex(), prev=QModelIndex()):
         """
@@ -277,14 +284,16 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
 
         if self.image_to_show_left is not None:
 
-            self.pixmap = self.channelmodel.\
-                get_image(index.row(), self.image_to_show_left)
+            self.pixmap = self.channelmodel.get_image(
+                index.row(), self.image_to_show_left
+            )
             if self.pixmap is not None:
                 self.labelImage.setPixmap(self.pixmap)
 
         if self.image_to_show_right is not None:
-            self.pixmapRight = self.channelmodel.\
-                get_image(index.row(), self.image_to_show_right)
+            self.pixmapRight = self.channelmodel.get_image(
+                index.row(), self.image_to_show_right
+            )
             if self.pixmapRight is not None:
                 self.labelImageRight.setPixmap(self.pixmapRight)
 
@@ -294,25 +303,25 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         status = self.channelmodel.get_status(index.row())
         self.labelCurrentCh.setText(status)
 
-#    def react_fit_height(self):
-#        """
-#        helper
-#        """
-#        self.set_sizes('h')
-#
-#    def react_fit_width(self):
-#        """
-#        helper
-#        """
-#        self.set_sizes('w')
-#
-#    def react_1_1(self):
-#        """
-#        helper
-#        """
-#        self.set_sizes('1')
-#
-    def set_sizes(self, clicked='w'):
+    #    def react_fit_height(self):
+    #        """
+    #        helper
+    #        """
+    #        self.set_sizes('h')
+    #
+    #    def react_fit_width(self):
+    #        """
+    #        helper
+    #        """
+    #        self.set_sizes('w')
+    #
+    #    def react_1_1(self):
+    #        """
+    #        helper
+    #        """
+    #        self.set_sizes('1')
+    #
+    def set_sizes(self, clicked="w"):
         """
         set image size
         """
@@ -320,24 +329,25 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         # fit_w = self.actionFitWidth.isChecked()
         # oneone = self.action_1_1.isChecked()
 
-#        if clicked in 'hw':
-#            if fit_h or fit_w:
-#                self.action_1_1.setChecked(False)
-#                oneone = False
-#
-#            else:
-#                self.action_1_1.setChecked(True)
-#                oneone = True
-#
-#        else:
-#            if oneone:
-#                self.actionFitHeight.setChecked(False)
-#                self.actionFitWidth.setChecked(False)
-#                fit_h = fit_w = False
-#
-        seq = ((self.labelImage, self.pixmap, self.scrollAreaImage),
-               (self.labelImageRight, self.pixmapRight,
-                self.scrollAreaImageRight))
+        #        if clicked in 'hw':
+        #            if fit_h or fit_w:
+        #                self.action_1_1.setChecked(False)
+        #                oneone = False
+        #
+        #            else:
+        #                self.action_1_1.setChecked(True)
+        #                oneone = True
+        #
+        #        else:
+        #            if oneone:
+        #                self.actionFitHeight.setChecked(False)
+        #                self.actionFitWidth.setChecked(False)
+        #                fit_h = fit_w = False
+        #
+        seq = (
+            (self.labelImage, self.pixmap, self.scrollAreaImage),
+            (self.labelImageRight, self.pixmapRight, self.scrollAreaImageRight),
+        )
 
         for label, image, area in seq:
             if image is not None:
@@ -347,19 +357,19 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
                 label.resize(QSize(width, height))
 
     def toggle_sorted_pos(self):
-        self.toggle('sorted pos')
+        self.toggle("sorted pos")
 
     def toggle_sorted_neg(self):
-        self.toggle('sorted neg')
+        self.toggle("sorted neg")
 
     def toggle_sort_pos(self):
-        self.toggle('sort pos')
+        self.toggle("sort pos")
 
     def toggle_sort_neg(self):
-        self.toggle('sort neg')
+        self.toggle("sort neg")
 
     def toggle_extract(self):
-        self.toggle('extract')
+        self.toggle("extract")
 
     def toggle(self, what):
         """
@@ -368,10 +378,9 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         index = self.tableViewChannels.selectedIndexes()
         if index:
             self.channelmodel.toggle(index[0], what)
-            self.tableViewChannels.selectionModel().\
-                setCurrentIndex(index[0],
-                                QItemSelectionModel.Select |
-                                QItemSelectionModel.Current)
+            self.tableViewChannels.selectionModel().setCurrentIndex(
+                index[0], QItemSelectionModel.Select | QItemSelectionModel.Current
+            )
 
     def goto_next(self):
         self.goto(1)
@@ -395,10 +404,9 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
                     return
 
             new_index = self.channelmodel.createIndex(row + shift, col)
-            self.tableViewChannels.selectionModel().\
-                setCurrentIndex(new_index,
-                                QItemSelectionModel.Select |
-                                QItemSelectionModel.Current)
+            self.tableViewChannels.selectionModel().setCurrentIndex(
+                new_index, QItemSelectionModel.Select | QItemSelectionModel.Current
+            )
 
     def print_all(self):
         """
@@ -416,42 +424,44 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         """
         print out sort/extract channels
         """
-        infixes = {DO_EXTRACT_STR:      'extract',
-                   DO_SORT_STR_POS:     'sort_pos',
-                   DO_SORT_STR_NEG:     'sort_neg',
-                   SORT_MANUAL_STR_POS: 'manual_pos',
-                   SORT_MANUAL_STR_NEG: 'manual_neg',
-                   DROP_STR_POS:        'drop_pos',
-                   DROP_STR_NEG:        'drop_neg'}
+        infixes = {
+            DO_EXTRACT_STR: "extract",
+            DO_SORT_STR_POS: "sort_pos",
+            DO_SORT_STR_NEG: "sort_neg",
+            SORT_MANUAL_STR_POS: "manual_pos",
+            SORT_MANUAL_STR_NEG: "manual_neg",
+            DROP_STR_POS: "drop_pos",
+            DROP_STR_NEG: "drop_neg",
+        }
 
         infix = infixes[what]
 
         if self.label is not None:
-            infix += '_' + self.label
+            infix += "_" + self.label
 
         chans = self.channelmodel.get_channels(what)
 
         if not chans:
             return
 
-        out_fname = 'do_' + infix + '.txt'
+        out_fname = "do_" + infix + ".txt"
 
         write = True
 
         if os.path.exists(out_fname):
             msgbox = QMessageBox()
-            msgbox.setText('Overwrite {} ?'.format(out_fname))
+            msgbox.setText("Overwrite {} ?".format(out_fname))
             msgbox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             ret = msgbox.exec_()
             if ret == QMessageBox.Yes:
-                print('Overwriting ' + out_fname)
-                os.rename(out_fname, out_fname + '.bak') 
+                print("Overwriting " + out_fname)
+                os.rename(out_fname, out_fname + ".bak")
             else:
                 write = False
 
         if write:
-            with open(out_fname, 'w') as fid:
-                fid.write('\n'.join(chans))
+            with open(out_fname, "w") as fid:
+                fid.write("\n".join(chans))
 
             fid.close()
 
@@ -459,7 +469,7 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         """
         helper
         """
-        where = 'left'
+        where = "left"
         which_text = str(self.comboBoxLeftImage.currentText())
         which = IMG_BY_LABEL[which_text]
         print(which)
@@ -469,7 +479,7 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         """
         helper
         """
-        where = 'right'
+        where = "right"
         which_text = str(self.comboBoxRightImage.currentText())
         which = IMG_BY_LABEL[which_text]
         self.set_image(where, which)
@@ -478,7 +488,7 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
         """
         defines which type of image we show
         """
-        if where == 'left':
+        if where == "left":
             self.image_to_show_left = which
         else:
             self.image_to_show_right = which
@@ -490,11 +500,12 @@ class GuiOverview(QMainWindow, Ui_MainWindow):
 
 def main():
     APP = QApplication(sys.argv)
-    APP.setStyle(options['guistyle'])
+    APP.setStyle(options["guistyle"])
     WIN = GuiOverview()
-    WIN.setWindowTitle('Combinato channel overview')
+    WIN.setWindowTitle("Combinato channel overview")
     WIN.showMaximized()
     APP.exec_()
+
 
 if __name__ == "__main__":
     main()

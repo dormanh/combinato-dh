@@ -19,5 +19,5 @@ def expandts(ts, timestep, q=1):
     time points after each time point in ts
     all times are given in ms
     """
-    interp = np.arange(0, 512*timestep, q*timestep)
+    interp = np.arange(0, 512 * timestep, q * timestep)
     return np.hstack([interp + t for t in ts])

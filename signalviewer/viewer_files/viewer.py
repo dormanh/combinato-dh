@@ -7,10 +7,11 @@ import os
 from glob import glob
 from time import time
 from collections import defaultdict
+
 # import datetime
 import numpy as np
 
-from PyQt5.QtCore import Qt 
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QFileDialog
 
 from matplotlib.gridspec import GridSpec
@@ -24,21 +25,19 @@ from .sWidgets import MplCanvas
 from .. import H5Manager, debug, options, DATE_FNAME, parse_datetime
 from .spikes import SpikeView
 
-stylesheet = 'QListView:focus { background-color: rgb(240, 255, 255)}'
+stylesheet = "QListView:focus { background-color: rgb(240, 255, 255)}"
 
-COLORS = ['darkblue', 'red', 'magenta', 'black', 'green']
-gs = GridSpec(1, 1, top=.95, bottom=.05, left=.05, right=.95)
+COLORS = ["darkblue", "red", "magenta", "black", "green"]
+gs = GridSpec(1, 1, top=0.95, bottom=0.05, left=0.05, right=0.95)
 DEBUG = True
 
-sleepdtype = np.dtype([('starttime', float),
-                       ('stoptime', float),
-                       ('stage', 'S1')])
+sleepdtype = np.dtype([("starttime", float), ("stoptime", float), ("stage", "S1")])
 
 
 def fmtfunc(x, pos=None):
     d = num2date(x)
-    out = d.strftime('%H:%M:%S.')
-    out += format(np.round(d.microsecond/1000, 1), '03.0f')
+    out = d.strftime("%H:%M:%S.")
+    out += format(np.round(d.microsecond / 1000, 1), "03.0f")
     return out
 
 
@@ -64,16 +63,16 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         t1 = time()
         self.init_h5man()
         dt = time() - t1
-        debug('Init h5 took {:.1f} s'.format(dt))
+        debug("Init h5 took {:.1f} s".format(dt))
         self.setopts()
         self.labelFolder.setText(os.path.split(os.getcwd())[1])
         self.init_montages()
         self.init_realtime()
         self.display_sleep = None
-        if os.path.exists('sleepstages_clean.npy'):
-            self.display_sleep = np.load('sleepstages_clean.npy')
-        elif os.path.exists('sleepstages.npy'):
-            self.display_sleep = np.load('sleepstages.npy')
+        if os.path.exists("sleepstages_clean.npy"):
+            self.display_sleep = np.load("sleepstages_clean.npy")
+        elif os.path.exists("sleepstages.npy"):
+            self.display_sleep = np.load("sleepstages.npy")
 
     def init_traces(self):
         """
@@ -81,22 +80,22 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         Each trace has a display scale factor,
         which we store in the dictionary self.all_traces
         """
-        fname_trace = 'traces.txt'
+        fname_trace = "traces.txt"
         if os.path.exists(fname_trace):
             self.all_traces = dict()
-            with open(fname_trace, 'r') as fid:
+            with open(fname_trace, "r") as fid:
                 lines = [line.strip() for line in fid.readlines()]
 
             for line in lines:
-                fields = line.split(' ')
+                fields = line.split(" ")
                 self.all_traces[fields[0]] = int(fields[1])
         else:
-            self.all_traces = {'rawdata': 1}
+            self.all_traces = {"rawdata": 1}
         debug(self.all_traces)
         for trace in sorted(self.all_traces.keys()):
             action = self.menuTraces.addAction(trace)
             action.setCheckable(True)
-            if trace == 'rawdata':
+            if trace == "rawdata":
                 action.setChecked(True)
 
     def setup_gui(self):
@@ -120,17 +119,19 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         self.actionSampDown.triggered.connect(self.samp_down)
         self.sstglabel = QLabel(self)
         self.statusBar().addWidget(self.sstglabel)
-        pairs = ((self.action_W, self.set_w),
-                 (self.action_N1, self.set_n1),
-                 (self.action_N2, self.set_n2),
-                 (self.action_N3, self.set_n3),
-                 (self.action_R, self.set_r),
-                 (self.action_Save_to_file, self.save_sleepstages))
+        pairs = (
+            (self.action_W, self.set_w),
+            (self.action_N1, self.set_n1),
+            (self.action_N2, self.set_n2),
+            (self.action_N3, self.set_n3),
+            (self.action_R, self.set_r),
+            (self.action_Save_to_file, self.save_sleepstages),
+        )
         for action, func in pairs:
             action.triggered.connect(func)
 
     def init_h5man(self):
-        cands = glob('*_ds.h5')
+        cands = glob("*_ds.h5")
         self.h5man = H5Manager(cands)
 
         for chn in self.h5man.chs:
@@ -138,7 +139,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
             action.setCheckable(True)
             action.triggered.connect(self.setch)
 
-        debug('Available channels: {}'.format(self.h5man.chs))
+        debug("Available channels: {}".format(self.h5man.chs))
 
     def init_realtime(self):
         """
@@ -161,7 +162,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         """
         Make a list of montage files
         """
-        cands = glob('*_montage.txt')
+        cands = glob("*_montage.txt")
         for cand in cands:
             name = cand[:-4]
             action = self.menuRefs.addAction(name)
@@ -172,13 +173,12 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         """
         read a montage from file
         """
-        checked_montages = [a for a in self.menuRefs.children()
-                            if a.isChecked()]
-        fnames = [str(a.text()) + '.txt' for a in checked_montages]
+        checked_montages = [a for a in self.menuRefs.children() if a.isChecked()]
+        fnames = [str(a.text()) + ".txt" for a in checked_montages]
         all_lines = []
         for fname in fnames:
             print(fname)
-            with open(fname, 'r') as fid:
+            with open(fname, "r") as fid:
                 lines = [line.strip() for line in fid.readlines()]
             all_lines += lines
 
@@ -191,13 +191,13 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         montage = defaultdict(list)
         positions = dict()
         for il, line in enumerate(lines):
-            res = line.split('-')
+            res = line.split("-")
             if len(res) == 2:
                 main, ref = res
             elif len(res) == 1:
                 main = res[0]
                 ref = 0
-            if (main in self.h5man.chs):
+            if main in self.h5man.chs:
                 if (ref in self.h5man.chs) or (ref == 0):
                     montage[ref].append(main)
                     positions[main] = il
@@ -210,13 +210,12 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         """
         simply list the names of the checked traces
         """
-        self.checked_traces = [str(act.text())
-                               for act in self.menuTraces.children()
-                               if act.isChecked()]
+        self.checked_traces = [
+            str(act.text()) for act in self.menuTraces.children() if act.isChecked()
+        ]
 
     def setch(self):
-        checked_actions = [a for a in self.menuChannels.children()
-                           if a.isChecked()]
+        checked_actions = [a for a in self.menuChannels.children() if a.isChecked()]
         checked_channels = [str(a.text()) for a in checked_actions]
         self.set_montage(checked_channels)
 
@@ -233,8 +232,11 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         return True
 
     def save_image(self):
-        fname = str(QFileDialog.getSaveFileName(self,
-                    'Save Image', '~', 'Images (*.jpg, *.pdf, *.png)'))
+        fname = str(
+            QFileDialog.getSaveFileName(
+                self, "Save Image", "~", "Images (*.jpg, *.pdf, *.png)"
+            )
+        )
         self.figure.fig.savefig(fname, dpi=150)
 
     def convert_time(self, time, internal=False):
@@ -245,7 +247,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
             return time
 
         if self.use_date:
-            time = (time - self.ts_start_nlx)/(1000*24*60*60)
+            time = (time - self.ts_start_nlx) / (1000 * 24 * 60 * 60)
             time += self.ts_start_mpl
         else:
             time /= 1000
@@ -264,67 +266,60 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         for ref_ch in self.montage:
             ref_data = 0
             ref_time = None
-            print('Reference now: ' + str(ref_ch))
+            print("Reference now: " + str(ref_ch))
 
             if ref_ch != 0:
                 start_ch_ref = self.h5man.translate(ref_ch, start)
-                stop_ch_ref = start_ch_ref + self.h5man.translate(ref_ch,
-                                                                  nblocks)
-                ref_d, adbitvolts = self.h5man.get_data(ref_ch,
-                                                        start_ch_ref,
-                                                        stop_ch_ref,
-                                                        self.checked_traces)
+                stop_ch_ref = start_ch_ref + self.h5man.translate(ref_ch, nblocks)
+                ref_d, adbitvolts = self.h5man.get_data(
+                    ref_ch, start_ch_ref, stop_ch_ref, self.checked_traces
+                )
                 ref_data = ref_d * adbitvolts
-                time = self.h5man.get_time(ref_ch, start_ch_ref,
-                                           stop_ch_ref)
+                time = self.h5man.get_time(ref_ch, start_ch_ref, stop_ch_ref)
 
             # iterate over all channels with that reference
             for ch in self.montage[ref_ch]:
-                print('Updating {}-{}'.format(ch, ref_ch))
+                print("Updating {}-{}".format(ch, ref_ch))
                 start_ch = self.h5man.translate(ch, start)
                 stop_ch = start_ch + self.h5man.translate(ch, nblocks)
 
                 if ref_ch != 0:
                     assert start_ch == start_ch_ref
                     assert stop_ch == stop_ch_ref
-                d, adbitvolts = self.h5man.get_data(ch, start_ch, stop_ch,
-                                                    self.checked_traces)
+                d, adbitvolts = self.h5man.get_data(
+                    ch, start_ch, stop_ch, self.checked_traces
+                )
 
                 data = ((d * adbitvolts) - ref_data) * self.lfpfactor
 
                 if ref_time is not None:
                     time = ref_time
                 else:
-                    time = self.h5man.get_time(ch, start_ch,
-                                               stop_ch)
+                    time = self.h5man.get_time(ch, start_ch, stop_ch)
                 allstart = max(allstart, time[0])
                 allstop = min(allstop, time[-1])
 
                 plot_time = self.convert_time(time)
                 shift = self.positions[ch] * self.offset
 
-                for irow, (row, name) in enumerate(
-                        zip(data, self.checked_traces)):
+                for irow, (row, name) in enumerate(zip(data, self.checked_traces)):
                     # multiply each trace by its factor
                     row *= self.all_traces[name]
-                    self.ax.plot(plot_time, shift + row,
-                                 COLORS[irow], lw=1)
+                    self.ax.plot(plot_time, shift + row, COLORS[irow], lw=1)
 
                 if ref_ch == 0:
                     label = ch
                 else:
-                    label = '{}-{}'.format(ch, ref_ch)
-                self.ax.text(plot_time[0], shift, label,
-                             backgroundcolor='w')
+                    label = "{}-{}".format(ch, ref_ch)
+                self.ax.text(plot_time[0], shift, label, backgroundcolor="w")
 
                 if self.actionShowBoxes.isChecked():
                     self.plot_events(ch, start_ch, stop_ch, shift)
 
         if not self.use_date:
-            self.ax.set_xlabel('seconds')
+            self.ax.set_xlabel("seconds")
 
-        plot_start, plot_stop = [self.convert_time(t)
-                                 for t in (allstart, allstop)]
+        plot_start, plot_stop = [self.convert_time(t) for t in (allstart, allstop)]
         self.ax.set_xlim((plot_start, plot_stop))
 
         self.allstart = allstart
@@ -335,50 +330,52 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         Add boxes for detected events
         """
         for itr, trace in enumerate(self.checked_traces):
-            events = self.h5man.get_events(ch, start_ch, stop_ch,
-                                           trace)
-            print('Plotting {} events'.format(len(events)))
+            events = self.h5man.get_events(ch, start_ch, stop_ch, trace)
+            print("Plotting {} events".format(len(events)))
             for iev, event in enumerate(events):
                 if event[0] == event[1]:
                     continue
                 times = self.h5man.get_time(ch, event[0], event[1])
-                start_ev, stop_ev = [self.convert_time(t)
-                                     for t in (times[0], times[-1])]
-                rec = Rectangle((start_ev, shift - self.offset/2),
-                                stop_ev - start_ev,
-                                self.offset,
-                                edgecolor='none',
-                                alpha=options['alpha'],
-                                facecolor=COLORS[itr])
+                start_ev, stop_ev = [
+                    self.convert_time(t) for t in (times[0], times[-1])
+                ]
+                rec = Rectangle(
+                    (start_ev, shift - self.offset / 2),
+                    stop_ev - start_ev,
+                    self.offset,
+                    edgecolor="none",
+                    alpha=options["alpha"],
+                    facecolor=COLORS[itr],
+                )
                 self.ax.add_artist(rec)
 
-#    def plot_spikes(self, ch, offset):
-#        self.h5man.spm.set_beg_end(ch,
-#                                   self.current_start_time,
-#                                   self.current_stop_time)
-#        ptimes = []
-#        if ch in self.h5man.spm.sortedfiles:
-#            print('getting sorted data!')
-#            clu = self.h5man.spm.get_sorted_data(ch, self.current_start_time,
-#                                                 self.current_stop_time)
-#
-#            for c, cl in clu.items():
-#                print(c, cl['times'].shape[0])
-#                if len(cl['times']):
-#                    ptimes.append(self.sleepstg.convert_time(cl['times']/1000))
-#                    print (self.current_start_time,
-#                           self.current_stop_time, cl['times'][0])
-#
-#        else:
-#            sptimes = self.h5man.spm.get_sp_data(ch)
-#            ptimes.append(self.sleepstg.convert_time(sptimes/1000))
-#
-#        color = 'brgymkkkkkkkkkkkkkk'
-#        for i, cluster in enumerate(ptimes):
-#            print(num2date(ptimes[0]))
-#            y = offset * np.ones(len(cluster), 'int8')
-#            self.ax.plot(cluster, y, color[i] + '|',
-#                         ms=options['ms'], mew=options['mew'])
+    #    def plot_spikes(self, ch, offset):
+    #        self.h5man.spm.set_beg_end(ch,
+    #                                   self.current_start_time,
+    #                                   self.current_stop_time)
+    #        ptimes = []
+    #        if ch in self.h5man.spm.sortedfiles:
+    #            print('getting sorted data!')
+    #            clu = self.h5man.spm.get_sorted_data(ch, self.current_start_time,
+    #                                                 self.current_stop_time)
+    #
+    #            for c, cl in clu.items():
+    #                print(c, cl['times'].shape[0])
+    #                if len(cl['times']):
+    #                    ptimes.append(self.sleepstg.convert_time(cl['times']/1000))
+    #                    print (self.current_start_time,
+    #                           self.current_stop_time, cl['times'][0])
+    #
+    #        else:
+    #            sptimes = self.h5man.spm.get_sp_data(ch)
+    #            ptimes.append(self.sleepstg.convert_time(sptimes/1000))
+    #
+    #        color = 'brgymkkkkkkkkkkkkkk'
+    #        for i, cluster in enumerate(ptimes):
+    #            print(num2date(ptimes[0]))
+    #            y = offset * np.ones(len(cluster), 'int8')
+    #            self.ax.plot(cluster, y, color[i] + '|',
+    #                         ms=options['ms'], mew=options['mew'])
 
     def update(self):
         if not self.readlineEdits():
@@ -389,7 +386,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
             self.ax = self.figure.fig.add_subplot(gs[0])
         self.ax.cla()
         self.ax.grid(True)
-        self.ax.set_ylabel(u'µV')
+        self.ax.set_ylabel("µV")
         if self.actionUse_wall_time.isChecked():
             self.use_date = True
         else:
@@ -409,23 +406,36 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
                 ylim = self.ylim
             self.ax.set_ylim(ylim)
             self.ax.set_yticks(range(0, ylim[1] + 100, 100))
-            self.ax.set_yticklabels([0, round(100/self.lfpfactor)])
+            self.ax.set_yticklabels([0, round(100 / self.lfpfactor)])
 
         if self.display_sleep is not None:
-            start, stop = [self.convert_time(time, internal=True)
-                           for time in (self.allstart, self.allstop)]
-            rel_idx = (self.display_sleep['stoptime'] >= start) &\
-                      (self.display_sleep['starttime'] <= stop)
+            start, stop = [
+                self.convert_time(time, internal=True)
+                for time in (self.allstart, self.allstop)
+            ]
+            rel_idx = (self.display_sleep["stoptime"] >= start) & (
+                self.display_sleep["starttime"] <= stop
+            )
             for row in self.display_sleep[rel_idx]:
                 print(row)
                 rowstart = max(start, row[0])
                 rowstop = min(stop, row[1])
-                recstart, recstop = [self.convert_time(t)
-                                     for t in (rowstart, rowstop)]
-                rec = Rectangle((recstart, ylim[0]), recstop - recstart,
-                                self.offset/2, facecolor='r', alpha=.5)
-                self.ax.text(recstart, ylim[0]+self.offset/2, row[2],
-                             fontsize=14, va='top', ha='left')
+                recstart, recstop = [self.convert_time(t) for t in (rowstart, rowstop)]
+                rec = Rectangle(
+                    (recstart, ylim[0]),
+                    recstop - recstart,
+                    self.offset / 2,
+                    facecolor="r",
+                    alpha=0.5,
+                )
+                self.ax.text(
+                    recstart,
+                    ylim[0] + self.offset / 2,
+                    row[2],
+                    fontsize=14,
+                    va="top",
+                    ha="left",
+                )
                 self.ax.add_patch(rec)
 
         self.figure.draw()
@@ -446,7 +456,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
     def setopts(self):
 
         lfpperc = float(self.spinBoxLFPpercent.value())
-        self.lfpfactor = lfpperc/100
+        self.lfpfactor = lfpperc / 100
 
         self.update()
 
@@ -463,23 +473,25 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         self.update()
 
     def set_w(self):
-        self.set_sleepstage('W')
+        self.set_sleepstage("W")
 
     def set_n1(self):
-        self.set_sleepstage('1')
+        self.set_sleepstage("1")
 
     def set_n2(self):
-        self.set_sleepstage('2')
+        self.set_sleepstage("2")
 
     def set_n3(self):
-        self.set_sleepstage('3')
+        self.set_sleepstage("3")
 
     def set_r(self):
-        self.set_sleepstage('R')
+        self.set_sleepstage("R")
 
     def set_sleepstage(self, which):
-        start, stop = [self.convert_time(time, internal=True)
-                       for time in (self.allstart, self.allstop)]
+        start, stop = [
+            self.convert_time(time, internal=True)
+            for time in (self.allstart, self.allstop)
+        ]
         self.sleepstages.append((start, stop, which))
         self.advance()
 
@@ -488,7 +500,7 @@ class SimpleViewer(QMainWindow, Ui_MainWindow):
         save sleepstages to file
         """
         data = np.array(self.sleepstages, sleepdtype)
-        np.save('sleepstages.npy', data)
+        np.save("sleepstages.npy", data)
 
 
 def main():
@@ -496,6 +508,7 @@ def main():
     w = SimpleViewer()
     w.show()
     app.exec_()
+
 
 if __name__ == "__main__":
     main()

@@ -10,6 +10,7 @@ class SpikeManager(object):
     """
     Represent spikes for data viewer
     """
+
     def __init__(self, sign, label):
         self.fnames = {}
         self.openfiles = {}
@@ -26,7 +27,7 @@ class SpikeManager(object):
             fid.close()
 
     def check_add(self, key, entname):
-        sppath = os.path.join(key, 'data_{}.h5'.format(key))
+        sppath = os.path.join(key, "data_{}.h5".format(key))
         sorted_path = os.path.join(key, self.label)
         if os.path.isdir(sorted_path):
             self.sortednames[entname] = sppath
@@ -38,24 +39,25 @@ class SpikeManager(object):
 
     def h5f_by_key(self, key):
         if key in self.sortednames:
-            print('loading sorted spikes for ' + key)
-            self.sortedfiles[key] = Combinato(self.sortednames[key],
-                                              self.sign, self.label)
+            print("loading sorted spikes for " + key)
+            self.sortedfiles[key] = Combinato(
+                self.sortednames[key], self.sign, self.label
+            )
 
         if key not in self.fnames:
-            debug('No spike file for ' + key)
+            debug("No spike file for " + key)
             return
 
         if key not in self.openfiles:
-            fid = tables.open_file(self.fnames[key], 'r')
+            fid = tables.open_file(self.fnames[key], "r")
             self.openfiles[key] = fid
             # warning! times get loaded as copies
             # because we have to search them
-            print('Loading times for ' + key)
-            t = fid.get_node('/' + self.sign + '/times')[:]
-            print('Done')
+            print("Loading times for " + key)
+            t = fid.get_node("/" + self.sign + "/times")[:]
+            print("Done")
             self.times[key] = t
-            s = fid.get_node('/' + self.sign + '/spikes')
+            s = fid.get_node("/" + self.sign + "/spikes")
             self.spikes[key] = s
 
         else:
@@ -64,7 +66,7 @@ class SpikeManager(object):
 
         return t, s
 
-    def set_beg_end(self, key, start, stop, sign='pos'):
+    def set_beg_end(self, key, start, stop, sign="pos"):
 
         ret = self.h5f_by_key(key, sign)
         if ret is None:
@@ -87,7 +89,7 @@ class SpikeManager(object):
             print(start, stop)
             clu = self.sortedfiles[key].get_groups_joined()
             for c in clu:
-                times = clu[c]['times']
+                times = clu[c]["times"]
                 idx = (times >= start) & (times <= stop)
                 print(times[0], times[-1], start, stop)
                 print(c, idx.sum())
@@ -95,7 +97,7 @@ class SpikeManager(object):
                     t = times[idx]
                 else:
                     t = ea
-                ret[c] = {'times': t}
+                ret[c] = {"times": t}
                 print(c, idx.sum())
 
             return ret
@@ -103,7 +105,7 @@ class SpikeManager(object):
         else:
             return np.array([])
 
-    def get_sp_data(self, key, which='times'):
+    def get_sp_data(self, key, which="times"):
         key = str(key)
 
         if key in self.beg_end:
@@ -112,10 +114,9 @@ class SpikeManager(object):
         else:
             return np.array([])
 
-        if which == 'times':
+        if which == "times":
             retv = self.times[key]
-        elif which == 'spikes':
+        elif which == "spikes":
             retv = self.spikes[key]
 
         return retv[beg:end]
-

@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -60,7 +61,9 @@ class Ui_MainWindow(object):
         self.labelRecords.setObjectName("labelRecords")
         self.gridLayout.addWidget(self.labelRecords, 3, 0, 1, 1)
         self.labelFolder = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.labelFolder.sizePolicy().hasHeightForWidth())
@@ -86,7 +89,9 @@ class Ui_MainWindow(object):
         self.pushButtonSampUp.setObjectName("pushButtonSampUp")
         self.gridLayout.addWidget(self.pushButtonSampUp, 1, 4, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -210,4 +215,3 @@ class Ui_MainWindow(object):
         self.actionSampDown.setShortcut(_translate("MainWindow", "F4"))
         self.action_Save_to_file.setText(_translate("MainWindow", "&Save to file"))
         self.action_Save_to_file.setShortcut(_translate("MainWindow", "Ctrl+S"))
-

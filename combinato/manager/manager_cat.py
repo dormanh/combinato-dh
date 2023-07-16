@@ -9,29 +9,39 @@ import numpy as np
 import tables
 import os
 
-from .. import SIGNS, TYPE_NAMES, TYPE_ART, GROUP_NOCLASS, GROUP_ART, NcsFile,\
-    TYPE_NON_NOISE, TYPE_ALL
+from .. import (
+    SIGNS,
+    TYPE_NAMES,
+    TYPE_ART,
+    GROUP_NOCLASS,
+    GROUP_ART,
+    NcsFile,
+    TYPE_NON_NOISE,
+    TYPE_ALL,
+)
 
 debug = False
+
 
 class SortingFile(object):
     """
     represents a grouped sorting file
     """
+
     def __del__(self):
         self.h5fid.close()
 
     def __init__(self, h5fname):
-        self.h5fid = tables.open_file(h5fname, 'r+')
+        self.h5fid = tables.open_file(h5fname, "r+")
         self.index = self.h5fid.root.index[:]
         self.classes = self.h5fid.root.classes[:]
         self.groups = self.h5fid.root.groups[:]
         self.types = self.h5fid.root.types[:]
-        temp = self.h5fid.get_node_attr('/', 'sign')
+        temp = self.h5fid.get_node_attr("/", "sign")
         if debug:
-            print(f'Detected type {type(temp)}')
+            print(f"Detected type {type(temp)}")
         try:
-            self.sign = str(temp, 'utf-8')
+            self.sign = str(temp, "utf-8")
         except TypeError:
             self.sign = temp
 
@@ -120,8 +130,8 @@ class SortingFile(object):
 
         self.h5fid.root.groups[:] = groups
 
-        self.h5fid.remove_node('/', 'types')
-        self.h5fid.create_array('/', 'types', types)
+        self.h5fid.remove_node("/", "types")
+        self.h5fid.create_array("/", "types", types)
         self.h5fid.flush()
 
 
@@ -129,6 +139,7 @@ class SortingManagerGrouped(object):
     """
     represents a sorting session after grouping
     """
+
     def __del__(self):
         if self.h5datafile is not None:
             self.h5datafile.close()
@@ -137,9 +148,9 @@ class SortingManagerGrouped(object):
         self.basedir = os.path.dirname(h5fname)
         self.h5datafile = None
         try:
-            self.h5datafile = tables.open_file(h5fname, 'r')
+            self.h5datafile = tables.open_file(h5fname, "r")
         except IOError as error:
-            print('Could not initialize {}: {}'.format(h5fname, error))
+            print("Could not initialize {}: {}".format(h5fname, error))
             self.initialized = False
             return
 
@@ -169,7 +180,7 @@ class SortingManagerGrouped(object):
         try:
             thr = self.h5datafile.root.thr[:, :]
         except tables.exceptions.NoSuchNodeError:
-            print('Extraction thresholds were not saved!')
+            print("Extraction thresholds were not saved!")
             thr = None
         return thr
 
@@ -178,13 +189,12 @@ class SortingManagerGrouped(object):
         Tries to initialize a ncs header. Not necessarily possible.
         """
         ext = os.path.basename(self.basedir)
-        cand_folders = (os.path.join(self.basedir, '..'),
-                        ext)
+        cand_folders = (os.path.join(self.basedir, ".."), ext)
 
         name = None
 
         for folder in cand_folders:
-            for suffix in ('.ncs', '.Ncs'):
+            for suffix in (".ncs", ".Ncs"):
                 cand_name = os.path.join(folder, ext + suffix)
                 if os.path.exists(cand_name):
                     name = cand_name
@@ -197,16 +207,17 @@ class SortingManagerGrouped(object):
             return
 
         for folder in cand_folders:
-            cand_name = os.path.join(folder, 'channel_names.csv')
+            cand_name = os.path.join(folder, "channel_names.csv")
             if os.path.exists(cand_name):
                 import csv
+
                 with open(cand_name) as fid:
-                    reader = csv.reader(fid, delimiter=';')
+                    reader = csv.reader(fid, delimiter=";")
                     names = {l[0]: l[1] for l in reader}
-                self.header = {'AcqEntName': names[ext]}
+                self.header = {"AcqEntName": names[ext]}
                 return
 
-        print('Ncs file not found, no header!')
+        print("Ncs file not found, no header!")
         self.header = None
 
     def init_sorting(self, sorting_folder):
@@ -214,7 +225,7 @@ class SortingManagerGrouped(object):
         initialize a sorting folder
         returns True if init worked, else False
         """
-        sorting_path = os.path.join(sorting_folder, 'sort_cat.h5')
+        sorting_path = os.path.join(sorting_folder, "sort_cat.h5")
 
         if os.path.exists(sorting_path):
             self.sorting = SortingFile(sorting_path)
@@ -229,7 +240,7 @@ class SortingManagerGrouped(object):
         """
 
         if self.times[sign] is None:
-            self.times[sign] = self.h5datafile.get_node('/' + sign, 'times')[:]
+            self.times[sign] = self.h5datafile.get_node("/" + sign, "times")[:]
 
         t = self.times[sign]
         start_idx = t.searchsorted(start_time)
@@ -247,21 +258,20 @@ class SortingManagerGrouped(object):
         self.start_idx = start_idx
 
         if stop_idx in [np.inf, None]:
-            stop_idx = self.h5datafile.get_node('/' + sign,
-                                                'times').shape[0]
+            stop_idx = self.h5datafile.get_node("/" + sign, "times").shape[0]
 
         self.stop_idx = stop_idx
 
         self.sign = str(sign)
 
-        self.spikes[sign] =\
-            self.h5datafile.\
-            get_node('/' + sign, 'spikes')[start_idx:stop_idx, :]
+        self.spikes[sign] = self.h5datafile.get_node("/" + sign, "spikes")[
+            start_idx:stop_idx, :
+        ]
 
         if self.all_times[sign] is not None:
             t = self.all_times[sign]
         else:
-            t = self.h5datafile.get_node('/' + sign, 'times')
+            t = self.h5datafile.get_node("/" + sign, "times")
 
         self.times[sign] = t[start_idx:stop_idx]
 
@@ -287,14 +297,12 @@ class SortingManagerGrouped(object):
                     ret[gid][clid] = dict()
 
                     if times:
-                        ret[gid][clid]['times'] = self.times[self.sign][idx]
+                        ret[gid][clid]["times"] = self.times[self.sign][idx]
                     if spikes:
-                        ret[gid][clid]['spikes'] =\
-                            self.spikes[self.sign][idx, :]
+                        ret[gid][clid]["spikes"] = self.spikes[self.sign][idx, :]
 
-                    imgname = 'class_{:03d}.png'.format(clid)
-                    imgpath1 = os.path.join(self.basedir, self.sorting.basedir,
-                                            imgname)
+                    imgname = "class_{:03d}.png".format(clid)
+                    imgpath1 = os.path.join(self.basedir, self.sorting.basedir, imgname)
                     imgpath2 = os.path.join(self.sorting.basedir, imgname)
 
                     if os.path.exists(imgpath1):
@@ -305,7 +313,7 @@ class SortingManagerGrouped(object):
                     else:
                         imgval = None
 
-                    ret[gid][clid]['image'] = imgval
+                    ret[gid][clid]["image"] = imgval
 
         return ret
 
@@ -333,14 +341,14 @@ class SortingManagerGrouped(object):
         shape = self.times[self.sign].shape[0]
         if idx[-1] >= shape:
             idx = idx[idx < shape]
-            print('Shortened index!')
+            print("Shortened index!")
 
-        ret['type'] = gtype
-        ret['n_clusters'] = n_clusters
+        ret["type"] = gtype
+        ret["n_clusters"] = n_clusters
         if times:
-            ret['times'] = self.times[self.sign][idx]
+            ret["times"] = self.times[self.sign][idx]
         if spikes:
-            ret['spikes'] = self.spikes[self.sign][idx]
+            ret["spikes"] = self.spikes[self.sign][idx]
 
         return ret
 
@@ -351,9 +359,9 @@ class SortingManagerGrouped(object):
         idx = index - self.start_idx
         ret = dict()
         if times:
-            ret['times'] = self.times[self.sign][idx]
+            ret["times"] = self.times[self.sign][idx]
         if spikes:
-            ret['spikes'] = self.spikes[self.sign][idx]
+            ret["spikes"] = self.spikes[self.sign][idx]
 
         return ret
 
@@ -408,18 +416,19 @@ class SortingManagerGrouped(object):
         sel = (idx >= self.start_idx) & (idx < self.stop_idx)
         idx = idx[sel]
         ret = self.get_data_from_index(idx, times=times, spikes=spikes)
-        ret['type'] = TYPE_NON_NOISE
+        ret["type"] = TYPE_NON_NOISE
         return ret
 
     def get_all_spikes(self):
         """
         return all spikes
         """
-        sel = (self.sorting.index >= self.start_idx) &\
-            (self.sorting.index < self.stop_idx)
+        sel = (self.sorting.index >= self.start_idx) & (
+            self.sorting.index < self.stop_idx
+        )
         idx = self.sorting.index[sel]
         ret = self.get_data_from_index(idx)
-        ret['type'] = TYPE_ALL
+        ret["type"] = TYPE_ALL
         return ret
 
 
@@ -438,8 +447,7 @@ class Combinato(SortingManagerGrouped):
 
         # quick check if we can do this
         if not os.path.exists(sorting_session):
-            print('Session folder {} '
-                  'not found'.format(sorting_session))
+            print("Session folder {} " "not found".format(sorting_session))
             return
 
         super(Combinato, self).__init__(fname)
@@ -447,35 +455,37 @@ class Combinato(SortingManagerGrouped):
         res = self.init_sorting(sorting_session)
 
         if not res:
-            print('Sorting session {} '
-                  'not initialized'.format(sorting_session))
+            print("Sorting session {} " "not initialized".format(sorting_session))
         else:
             self.initialized = True
+
 
 def test(name, label, ts):
     """
     simple test case, needs a folder as argument
     """
     with open(ts) as fid:
-        start, stop = [int(x)/1000. for x in fid.readline().split()]
+        start, stop = [int(x) / 1000.0 for x in fid.readline().split()]
     fid.close()
 
     man = SortingManagerGrouped(name)
     if not man.initialized:
         return
-    print('Working on {}, from time {} to {} ({:.1f} min)'
-          .format(name, start, stop, (stop-start)/6e4))
-    start_idx, stop_idx = man.get_start_stop_index('pos', start, stop)
-    print('Setting start index: {}, stop index: {}'.
-          format(start_idx, stop_idx))
-    man.set_sign_times_spikes('pos', start_idx, stop_idx)
+    print(
+        "Working on {}, from time {} to {} ({:.1f} min)".format(
+            name, start, stop, (stop - start) / 6e4
+        )
+    )
+    start_idx, stop_idx = man.get_start_stop_index("pos", start, stop)
+    print("Setting start index: {}, stop index: {}".format(start_idx, stop_idx))
+    man.set_sign_times_spikes("pos", start_idx, stop_idx)
     ret = man.init_sorting(os.path.join(os.path.dirname(name), label))
     if not ret:
-        print('Unable to initialize!')
+        print("Unable to initialize!")
         return
     print(man.sorting.index.shape)
     groups = man.get_groups()
-    print('Retrieved Groups')
+    print("Retrieved Groups")
     test_gid = groups.keys()[0]
     man.get_group_joined(test_gid)
 
@@ -484,12 +494,12 @@ def test(name, label, ts):
     # iterate through clusters
     all_good = 0
     for k, v in groups.items():
-        print('Group {} type {}'.format(k, TYPE_NAMES[man.get_group_type(k)]))
+        print("Group {} type {}".format(k, TYPE_NAMES[man.get_group_type(k)]))
         print(v.keys())
         sumidx = 0
         for clid in v:
-            print('Cluster {} len {}'.format(clid, v[clid]['times'].shape[0]))
-            sumidx += v[clid]['times'].shape[0]
+            print("Cluster {} len {}".format(clid, v[clid]["times"].shape[0]))
+            sumidx += v[clid]["times"].shape[0]
 
         if man.get_group_type(k) > 0:
             all_good += sumidx
@@ -498,19 +508,22 @@ def test(name, label, ts):
         idx2 = man.sorting.get_cluster_index_alt(k)
         assert not (idx1 - idx2).any()
 
-        print('Total index len {} vs {} summed'.
-              format(idx1.shape[0], sumidx))
+        print("Total index len {} vs {} summed".format(idx1.shape[0], sumidx))
         # assert idx1.shape[0] == sumidx
 
     non_noise_spk = man.get_non_noise_spikes()
     total = man.get_all_spikes()
-    print('Non-noise index has {} elements'.
-          format(non_noise_spk['times'].shape[0]))
-    assert non_noise_spk['times'].shape[0] == all_good
+    print("Non-noise index has {} elements".format(non_noise_spk["times"].shape[0]))
+    assert non_noise_spk["times"].shape[0] == all_good
 
-    print('Total has {} elements'.format(total['times'].shape[0]))
+    print("Total has {} elements".format(total["times"].shape[0]))
 
     for gid, group in all_groups.items():
-        print('Group {} has {} times, type {} and {} members'.
-              format(gid, group['times'].shape[0],
-                     TYPE_NAMES[group['type']], group['n_clusters']))
+        print(
+            "Group {} has {} times, type {} and {} members".format(
+                gid,
+                group["times"].shape[0],
+                TYPE_NAMES[group["type"]],
+                group["n_clusters"],
+            )
+        )

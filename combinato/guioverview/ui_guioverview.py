@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -19,7 +20,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.labelLabel = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.labelLabel.sizePolicy().hasHeightForWidth())
@@ -27,10 +30,14 @@ class Ui_MainWindow(object):
         self.labelLabel.setObjectName("labelLabel")
         self.horizontalLayout.addWidget(self.labelLabel)
         self.lineEditLabel = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEditLabel.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.lineEditLabel.sizePolicy().hasHeightForWidth()
+        )
         self.lineEditLabel.setSizePolicy(sizePolicy)
         self.lineEditLabel.setObjectName("lineEditLabel")
         self.horizontalLayout.addWidget(self.lineEditLabel)
@@ -41,21 +48,29 @@ class Ui_MainWindow(object):
         self.checkBoxSetStates.setChecked(True)
         self.checkBoxSetStates.setObjectName("checkBoxSetStates")
         self.horizontalLayout.addWidget(self.checkBoxSetStates)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.splitter_2 = QtWidgets.QSplitter(self.centralwidget)
         self.splitter_2.setOrientation(QtCore.Qt.Vertical)
         self.splitter_2.setObjectName("splitter_2")
         self.tableViewChannels = QtWidgets.QTableView(self.splitter_2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tableViewChannels.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.tableViewChannels.sizePolicy().hasHeightForWidth()
+        )
         self.tableViewChannels.setSizePolicy(sizePolicy)
         self.tableViewChannels.setFrameShape(QtWidgets.QFrame.Box)
         self.tableViewChannels.setAlternatingRowColors(True)
-        self.tableViewChannels.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableViewChannels.setSelectionMode(
+            QtWidgets.QAbstractItemView.SingleSelection
+        )
         self.tableViewChannels.setSortingEnabled(True)
         self.tableViewChannels.setObjectName("tableViewChannels")
         self.splitter = QtWidgets.QSplitter(self.splitter_2)
@@ -76,10 +91,14 @@ class Ui_MainWindow(object):
         self.scrollAreaImage.setObjectName("scrollAreaImage")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 57, 599))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth()
+        )
         self.scrollAreaWidgetContents.setSizePolicy(sizePolicy)
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollAreaImage.setWidget(self.scrollAreaWidgetContents)
@@ -113,7 +132,9 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.action_Initialize_from_current_folder = QtWidgets.QAction(MainWindow)
-        self.action_Initialize_from_current_folder.setObjectName("action_Initialize_from_current_folder")
+        self.action_Initialize_from_current_folder.setObjectName(
+            "action_Initialize_from_current_folder"
+        )
         self.actionToggleExtract = QtWidgets.QAction(MainWindow)
         self.actionToggleExtract.setObjectName("actionToggleExtract")
         self.actionToggleSort = QtWidgets.QAction(MainWindow)
@@ -150,26 +171,45 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.labelLabel.setText(_translate("MainWindow", "Label for sorted sessions:"))
-        self.checkBoxInitH5.setText(_translate("MainWindow", "Initialize from h5-files"))
-        self.checkBoxSetStates.setText(_translate("MainWindow", "Set states upon initialization"))
+        self.checkBoxInitH5.setText(
+            _translate("MainWindow", "Initialize from h5-files")
+        )
+        self.checkBoxSetStates.setText(
+            _translate("MainWindow", "Set states upon initialization")
+        )
         self.menuActions.setTitle(_translate("MainWindow", "&Actions"))
-        self.action_Initialize_from_current_folder.setText(_translate("MainWindow", "&Initialize from current folder"))
-        self.action_Initialize_from_current_folder.setShortcut(_translate("MainWindow", "Ctrl+I"))
+        self.action_Initialize_from_current_folder.setText(
+            _translate("MainWindow", "&Initialize from current folder")
+        )
+        self.action_Initialize_from_current_folder.setShortcut(
+            _translate("MainWindow", "Ctrl+I")
+        )
         self.actionToggleExtract.setText(_translate("MainWindow", "Toggle &extract"))
         self.actionToggleExtract.setShortcut(_translate("MainWindow", "E"))
         self.actionToggleSort.setText(_translate("MainWindow", "Toggle sort &positive"))
         self.actionToggleSort.setShortcut(_translate("MainWindow", "S"))
         self.action_Next_channel.setText(_translate("MainWindow", "&Next channel"))
         self.action_Next_channel.setShortcut(_translate("MainWindow", "Space"))
-        self.action_Previous_channel.setText(_translate("MainWindow", "&Previous channel"))
+        self.action_Previous_channel.setText(
+            _translate("MainWindow", "&Previous channel")
+        )
         self.action_Previous_channel.setShortcut(_translate("MainWindow", "Shift+Up"))
-        self.actionSave_actions_to_file.setText(_translate("MainWindow", "Save &actions to file"))
+        self.actionSave_actions_to_file.setText(
+            _translate("MainWindow", "Save &actions to file")
+        )
         self.actionOne_Down.setText(_translate("MainWindow", "One Down"))
         self.actionOne_Down.setShortcut(_translate("MainWindow", "Shift+Down"))
-        self.actionToggle_sort_negative.setText(_translate("MainWindow", "Toggle sort &negative"))
+        self.actionToggle_sort_negative.setText(
+            _translate("MainWindow", "Toggle sort &negative")
+        )
         self.actionToggle_sort_negative.setShortcut(_translate("MainWindow", "Shift+S"))
-        self.actionToggle_sorted_positive.setText(_translate("MainWindow", "Toggle sorted positive"))
+        self.actionToggle_sorted_positive.setText(
+            _translate("MainWindow", "Toggle sorted positive")
+        )
         self.actionToggle_sorted_positive.setShortcut(_translate("MainWindow", "M"))
-        self.actionToggle_sorted_negative.setText(_translate("MainWindow", "Toggle sorted negative"))
-        self.actionToggle_sorted_negative.setShortcut(_translate("MainWindow", "Shift+M"))
-
+        self.actionToggle_sorted_negative.setText(
+            _translate("MainWindow", "Toggle sorted negative")
+        )
+        self.actionToggle_sorted_negative.setShortcut(
+            _translate("MainWindow", "Shift+M")
+        )

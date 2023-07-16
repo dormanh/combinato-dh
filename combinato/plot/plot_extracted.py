@@ -20,29 +20,24 @@ from .plot_cumulative_time import spike_cumulative
 from .. import artifact_id_to_name, get_channels, SortingManagerGrouped
 from .. import h5files
 
-SIGNS = ('pos', 'neg')
+SIGNS = ("pos", "neg")
 SPIKES_PER_PLOT = 5000
 N_COLS = 6
 FIG_WIDTH = 5.5
-HEIGHT_PER_ROW = int(np.ceil(FIG_WIDTH/N_COLS))
+HEIGHT_PER_ROW = int(np.ceil(FIG_WIDTH / N_COLS))
 DEBUG = True
-SPIKES_PER_ROW = SPIKES_PER_PLOT*N_COLS
-GRID_KEYS = {'left': 0,
-             'right': 1,
-             'top': 1,
-             'bottom': 0,
-             'hspace': 0,
-             'wspace': 0}
+SPIKES_PER_ROW = SPIKES_PER_PLOT * N_COLS
+GRID_KEYS = {"left": 0, "right": 1, "top": 1, "bottom": 0, "hspace": 0, "wspace": 0}
 YLIM = (-200, 200)
-OVERVIEW = 'overview'
-TEXT_SIZE = 'small'
+OVERVIEW = "overview"
+TEXT_SIZE = "small"
 
 
 def make_figure(n_rows):
     """
     returns an appropriate figure
     """
-    fig_height = n_rows*HEIGHT_PER_ROW
+    fig_height = n_rows * HEIGHT_PER_ROW
     return mpl.figure(figsize=(FIG_WIDTH, fig_height))
 
 
@@ -51,7 +46,7 @@ def set_spines(plot):
     turn off the border
     """
     for spines in plot.spines.values():
-        spines.set_linewidth(.2)
+        spines.set_linewidth(0.2)
 
 
 def set_params(plot, x, special=False):
@@ -69,8 +64,7 @@ def set_params(plot, x, special=False):
     plot.set_yticklabels([])
 
     if special:
-        plot.text(x[2], YLIM[1], str(YLIM[1]) + u' µV',
-                  va='top', size=TEXT_SIZE)
+        plot.text(x[2], YLIM[1], str(YLIM[1]) + " µV", va="top", size=TEXT_SIZE)
 
 
 def spikes_overview(dirname, save_fname):
@@ -78,23 +72,23 @@ def spikes_overview(dirname, save_fname):
     input: folder name
     save_fname: without .png, so that pos/neg can easily be inserted
     """
-    h5fname = os.path.join(dirname, 'data_' + dirname + '.h5')
+    h5fname = os.path.join(dirname, "data_" + dirname + ".h5")
     if not os.path.exists(h5fname):
         print("{} not found".format(h5fname))
         return
 
-    fid = tables.open_file(h5fname, 'r')
+    fid = tables.open_file(h5fname, "r")
 
     # loop over pos and neg
     for sign in SIGNS:
         try:
-            spikes = fid.get_node('/' + sign + '/spikes')[:, :]
+            spikes = fid.get_node("/" + sign + "/spikes")[:, :]
         except tables.NoSuchNodeError as error:
             print(error)
             continue
-        times = fid.get_node('/' + sign + '/times')[:]
+        times = fid.get_node("/" + sign + "/times")[:]
         try:
-            artifacts = fid.get_node('/' + sign + '/artifacts')[:]
+            artifacts = fid.get_node("/" + sign + "/artifacts")[:]
             arti_types = np.unique(artifacts)
             n_all_types = len(arti_types)
         except tables.NoSuchNodeError as error:
@@ -109,18 +103,18 @@ def spikes_overview(dirname, save_fname):
         x = np.arange(spikes.shape[1])
 
         if artifacts is None:
-            n_plots = int(np.ceil(n_spk/SPIKES_PER_PLOT))
+            n_plots = int(np.ceil(n_spk / SPIKES_PER_PLOT))
 
         else:  # if there are artifacts, iteration is a bit complex
             n_plots = 0
             for arti_type in arti_types:
                 # consider each artifact as its own type
                 idx = artifacts == arti_type
-                n_plots += int(np.ceil(idx.sum()/SPIKES_PER_PLOT))
+                n_plots += int(np.ceil(idx.sum() / SPIKES_PER_PLOT))
         if DEBUG:
-            print('{} {}: {} spikes'.format(h5fname, sign, n_spk))
+            print("{} {}: {} spikes".format(h5fname, sign, n_spk))
 
-        n_rows = int(np.ceil(n_plots/N_COLS))
+        n_rows = int(np.ceil(n_plots / N_COLS))
         fig = make_figure(n_rows)
         grid = GridSpec(n_rows, N_COLS, **GRID_KEYS)
 
@@ -141,7 +135,7 @@ def spikes_overview(dirname, save_fname):
             if current_spikes.shape[0] == 0:
                 continue
 
-            n_starts = int(np.ceil(current_spikes.shape[0]/SPIKES_PER_PLOT))
+            n_starts = int(np.ceil(current_spikes.shape[0] / SPIKES_PER_PLOT))
             for start_i in range(0, n_starts):
 
                 plot = fig.add_subplot(grid[plot_count])
@@ -151,16 +145,21 @@ def spikes_overview(dirname, save_fname):
                 spike_heatmap(plot, current_spikes[start:stop])
                 set_params(plot, x, start == 0)
                 if current_type in artifact_id_to_name:
-                    plot.text(x[2], YLIM[0]*.75,
-                              artifact_id_to_name[current_type],
-                              va='bottom', ha='left', size=TEXT_SIZE)
+                    plot.text(
+                        x[2],
+                        YLIM[0] * 0.75,
+                        artifact_id_to_name[current_type],
+                        va="bottom",
+                        ha="left",
+                        size=TEXT_SIZE,
+                    )
                 plot2 = plot.twiny()
                 spike_cumulative(plot2, current_times[start:stop], start == 0)
                 plot2.set_ylim(YLIM)
                 set_spines(plot2)
                 plot_count += 1
 
-        fig.savefig(save_fname + '_' + sign + '.png')
+        fig.savefig(save_fname + "_" + sign + ".png")
         mpl.close(fig)
 
     fid.close()
@@ -173,7 +172,7 @@ def process_folder(path):
     chans = get_channels(path)
     for chan in sorted(chans):
         ncs_fname = os.path.splitext(chans[chan])[0]
-        plot_fname = 'spikes_{}_{}'.format(chan, ncs_fname)
+        plot_fname = "spikes_{}_{}".format(chan, ncs_fname)
         save_fname = os.path.join(OVERVIEW, plot_fname)
         spikes_overview(ncs_fname, save_fname)
 
@@ -187,12 +186,12 @@ def process_file(fname):
     # e.g. storing the header info in the h5 file attrs
     man = SortingManagerGrouped(fname)
     try:
-        entity = man.header['AcqEntName']
+        entity = man.header["AcqEntName"]
     except TypeError:
-        entity = 'unknown'
+        entity = "unknown"
     ncs_fname = os.path.basename(fname)[5:-3]
     print(ncs_fname)
-    plot_fname = 'spikes_{}_{}'.format(entity, ncs_fname)
+    plot_fname = "spikes_{}_{}".format(entity, ncs_fname)
     save_fname = os.path.join(OVERVIEW, plot_fname)
     spikes_overview(ncs_fname, save_fname)
 
@@ -202,8 +201,9 @@ def parse_args():
     standard arg parsing function
     """
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
-    parser.add_argument('--datafiles', nargs='+')
+    parser.add_argument("--datafiles", nargs="+")
 
     args = parser.parse_args()
 

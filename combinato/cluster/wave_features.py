@@ -2,12 +2,13 @@
 
 from __future__ import print_function, division, absolute_import
 import numpy as np
-import pywt # scipy doesn't have the flexibility yet
+import pywt  # scipy doesn't have the flexibility yet
 from .. import options
 
-WAVELET = pywt.Wavelet(options['Wavelet'])
+WAVELET = pywt.Wavelet(options["Wavelet"])
 OUT_DTYPE = np.float32
 LEVEL = 4
+
 
 def wavelet_features(data):
     """
@@ -31,7 +32,7 @@ def wavelet_features(data):
 
 # FIXME move tests to separate test directory!
 def testit():
-    data = np.ones((3, 64)) 
+    data = np.ones((3, 64))
     data[0, :] = np.arange(64)
     data[1, :] = np.linspace(0, 1, 64)
     print(wavelet_features(data))

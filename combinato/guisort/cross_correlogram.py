@@ -1,7 +1,9 @@
 # JN 2016-06-10
 
 import numpy as np
+
 EMPTY = np.array([], dtype=np.float64)
+
 
 def cross_correlogram(times1, times2, lag, is_same):
     """
@@ -22,12 +24,12 @@ def cross_correlogram(times1, times2, lag, is_same):
     for i in range(outer.shape[0]):
         temp = outer[i]
         start = inner.searchsorted(temp - lag)
-        stop = inner.searchsorted(temp + lag, 'right')
+        stop = inner.searchsorted(temp + lag, "right")
         if is_same:
-            if (i > start):
+            if i > start:
                 lags.append(inner[start:i] - temp)
-            if (i + 1 < stop):
-                lags.append(inner[i+1:stop] - temp)
+            if i + 1 < stop:
+                lags.append(inner[i + 1 : stop] - temp)
             if (i < start) or (i >= stop):
                 lags.append(inner[start:stop] - temp)
         else:

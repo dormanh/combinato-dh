@@ -13,6 +13,7 @@ from scipy.io import loadmat
 SAMPLES_PER_REC = 512
 DEFAULT_MAT_SR = 24000
 
+
 def read_matfile(fname):
     """
     read data from a matfile
@@ -20,16 +21,16 @@ def read_matfile(fname):
     data = loadmat(fname)
 
     try:
-        sr = data['sr'].ravel()[0]
-        insert = 'stored'
+        sr = data["sr"].ravel()[0]
+        insert = "stored"
     except KeyError:
         sr = DEFAULT_MAT_SR
-        insert = 'default'
+        insert = "default"
 
-    print('Using ' + insert + ' sampling rate ({} kHz)'.format(sr/1000.))
-    ts = 1/sr
-    fdata = data['data'].ravel()
-    atimes = np.linspace(0, fdata.shape[0]/(sr/1000), fdata.shape[0])
+    print("Using " + insert + " sampling rate ({} kHz)".format(sr / 1000.0))
+    ts = 1 / sr
+    fdata = data["data"].ravel()
+    atimes = np.linspace(0, fdata.shape[0] / (sr / 1000), fdata.shape[0])
     # print(atimes.shape, fdata.shape)
     # print(ts)
 
@@ -50,9 +51,7 @@ class ExtractNcsFile(object):
 
         stepus = self.ncs_file.timestep * 1e6
 
-        self.timerange = np.arange(0,
-                                   SAMPLES_PER_REC * stepus,
-                                   stepus)
+        self.timerange = np.arange(0, SAMPLES_PER_REC * stepus, stepus)
 
         self.filter = DefaultFilter(self.ncs_file.timestep)
 
@@ -60,28 +59,31 @@ class ExtractNcsFile(object):
         """
         read data from an ncs file
         """
-        data, times = self.ncs_file.read(start, stop, 'both')
+        data, times = self.ncs_file.read(start, stop, "both")
         fdata = np.array(data).astype(np.float32)
-        fdata *= (1e6 * self.ncs_file.header['ADBitVolts'])
+        fdata *= 1e6 * self.ncs_file.header["ADBitVolts"]
 
         if self.ref_file is not None:
-            print('Reading reference data from {}'.
-                format(self.ref_file.filename))
-            ref_data = self.ref_file.read(start, stop, 'data')
+            print("Reading reference data from {}".format(self.ref_file.filename))
+            ref_data = self.ref_file.read(start, stop, "data")
             fref_data = np.array(ref_data).astype(np.float32)
-            fref_data *= 1e6 * self.ref_file.header['ADBitVolts']
+            fref_data *= 1e6 * self.ref_file.header["ADBitVolts"]
             fdata -= fref_data
 
-        expected_length = round((fdata.shape[0] - SAMPLES_PER_REC) *
-                                (self.ncs_file.timestep * 1e6))
+        expected_length = round(
+            (fdata.shape[0] - SAMPLES_PER_REC) * (self.ncs_file.timestep * 1e6)
+        )
 
         err = expected_length - times[-1] + times[0]
         if err != 0:
-            print("Timestep mismatch in {}"
-                  " between records {} and {}: {:.1f} ms"
-                  .format(self.fname, start, stop, err/1e3))
+            print(
+                "Timestep mismatch in {}"
+                " between records {} and {}: {:.1f} ms".format(
+                    self.fname, start, stop, err / 1e3
+                )
+            )
 
-        atimes = np.hstack([t + self.timerange for t in times])/1e3
+        atimes = np.hstack([t + self.timerange for t in times]) / 1e3
         # MUST NOT USE dictionaries here, because they would persist in memory
         return (fdata, atimes, self.ncs_file.timestep)
 
@@ -90,25 +92,25 @@ class OutFile(object):
     """
     write out file to hdf5 tables
     """
-    def __init__(self, name, fname, spoints=64, destination=''):
+
+    def __init__(self, name, fname, spoints=64, destination=""):
 
         dirname = os.path.join(destination, name)
         if not os.path.isdir(dirname):
             os.mkdir(dirname)
         fname = os.path.join(dirname, fname)
-        f = tables.open_file(fname, 'w')
-        f.create_group('/', 'pos', 'positive spikes')
-        f.create_group('/', 'neg', 'negative spikes')
+        f = tables.open_file(fname, "w")
+        f.create_group("/", "pos", "positive spikes")
+        f.create_group("/", "neg", "negative spikes")
 
-        for sign in ('pos', 'neg'):
-            f.create_earray('/' + sign, 'spikes',
-                           tables.Float32Atom(), (0, spoints))
-            f.create_earray('/' + sign, 'times', tables.FloatAtom(), (0,))
+        for sign in ("pos", "neg"):
+            f.create_earray("/" + sign, "spikes", tables.Float32Atom(), (0, spoints))
+            f.create_earray("/" + sign, "times", tables.FloatAtom(), (0,))
 
-        f.create_earray('/', 'thr', tables.FloatAtom(), (0, 3))
+        f.create_earray("/", "thr", tables.FloatAtom(), (0, 3))
 
         self.f = f
-        print('Initialized ' + fname)
+        print("Initialized " + fname)
 
     def write(self, data):
         r = self.f.root

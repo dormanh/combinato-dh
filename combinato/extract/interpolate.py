@@ -8,17 +8,17 @@ def upsample(data, factor):
     array.shape is assumed to be (num_events, num_values_per_event)
     """
 
-
     # vpe is values per event
     num_m, num_vpe = data.shape
     # new values appear only between old values, hence the "-1"
     up_num_vpe = (num_vpe - 1) * factor + 1
-    axis = arange(0, up_num_vpe, factor) 
+    axis = arange(0, up_num_vpe, factor)
     up_axis = arange(up_num_vpe)
     splines = make_interp_spline(axis, data.T)
     up_data = splines(up_axis)
 
     return up_data.T
+
 
 def align(data, center, low, high):
     """
@@ -26,14 +26,26 @@ def align(data, center, low, high):
     low and high define region where maxima are looked for
     """
     width = 5
-    index_max = data[:,center-width*low:center+width*high].argmax(1) + center - width*low
+    index_max = (
+        data[:, center - width * low : center + width * high].argmax(1)
+        + center
+        - width * low
+    )
     num_e, num_vpe = data.shape
-    aligned_data = zeros((num_e, num_vpe-width*low-width*high))
+    aligned_data = zeros((num_e, num_vpe - width * low - width * high))
     for i in range(num_e):
-        aligned_data[i] = data[i, index_max[i] - center + width*low :
-                               index_max[i] - center + num_vpe - width*high]
+        aligned_data[i] = data[
+            i,
+            index_max[i]
+            - center
+            + width * low : index_max[i]
+            - center
+            + num_vpe
+            - width * high,
+        ]
 
-    return (aligned_data, center-width*low)
+    return (aligned_data, center - width * low)
+
 
 def clean(data, center):
     """
@@ -43,6 +55,7 @@ def clean(data, center):
     index_max = data.argmax(1)
     return (data[index_max == center], (index_max != center))
 
+
 def downsample(data, old_center, skip, new_center=19, num_points=64):
     """
     downsample data
@@ -50,6 +63,6 @@ def downsample(data, old_center, skip, new_center=19, num_points=64):
     there are 64 points,
     maximum has index 19 (starting from 0)
     """
-#    index = (arange(num_points) - new_center) * skip + old_center
+    #    index = (arange(num_points) - new_center) * skip + old_center
     index = arange(num_points) * skip
-    return data[:,index], num_points
+    return data[:, index], num_points

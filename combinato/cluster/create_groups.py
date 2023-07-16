@@ -8,8 +8,16 @@ from __future__ import absolute_import, print_function, division
 
 import tables
 import numpy as np
-from .. import SortingManager, options, CLID_UNMATCHED, GROUP_ART, GROUP_NOCLASS,\
-    TYPE_ART, TYPE_NO, TYPE_MU
+from .. import (
+    SortingManager,
+    options,
+    CLID_UNMATCHED,
+    GROUP_ART,
+    GROUP_NOCLASS,
+    TYPE_ART,
+    TYPE_NO,
+    TYPE_MU,
+)
 from .dist import distance_groups
 
 
@@ -17,7 +25,7 @@ def create_groups(spikes, classes, clids, sign):
     """
     more efficient group merging
     """
-    crit = options['MaxDistMatchGrouping']
+    crit = options["MaxDistMatchGrouping"]
     groups = {}
     n_groups_in = len(clids) + 1
     means = np.empty((n_groups_in, spikes.shape[1]))
@@ -26,7 +34,7 @@ def create_groups(spikes, classes, clids, sign):
     # initialize to inf
     dists[:, :] = np.inf
     count = 1
-    
+
     for clid in clids:
         if clid == CLID_UNMATCHED:
             continue
@@ -44,7 +52,7 @@ def create_groups(spikes, classes, clids, sign):
         for j in range(i + 1, n_groups_in):
             if j not in groups:
                 continue
-            dists[i, j] = distance_groups(means[i, :], means[j, :], sign) 
+            dists[i, j] = distance_groups(means[i, :], means[j, :], sign)
 
     # iteratively merge groups and update dists
     minimum = -1
@@ -54,16 +62,18 @@ def create_groups(spikes, classes, clids, sign):
         minimum = dists[gr1, gr2]
         if minimum > crit:
             break
-        print('Merging {} and {}, dist: {:.4f}'.format(gr1, gr2, minimum))
+        print("Merging {} and {}, dist: {:.4f}".format(gr1, gr2, minimum))
         # merge groups 1 and 2 now
         groups[gr1] += groups[gr2]
-        del groups[gr2] 
+        del groups[gr2]
         # update nspks
         nspk1 = nspks[gr1]
         nspk2 = nspks[gr2]
         nspks[gr1] = nspk1 + nspk2
         # update means
-        means[gr1, :] = (means[gr1, :] * nspk1 + means[gr2, :] * nspk2) / (nspk1 + nspk2)
+        means[gr1, :] = (means[gr1, :] * nspk1 + means[gr2, :] * nspk2) / (
+            nspk1 + nspk2
+        )
         # update dists: everything containing gr2 is inf now
         # everything containing gr1 has to be redone
         dists[gr2, :] = np.inf
@@ -73,7 +83,7 @@ def create_groups(spikes, classes, clids, sign):
                 dists[i, gr1] = distance_groups(means[i], means[gr1], sign)
             elif i > gr2:
                 dists[gr1, i] = distance_groups(means[i], means[gr1], sign)
-    return groups 
+    return groups
 
 
 def main(datafname, sorting_fname, read_only=False):
@@ -81,18 +91,18 @@ def main(datafname, sorting_fname, read_only=False):
     main function
     """
     if read_only:
-        mode = 'r'
+        mode = "r"
     else:
-        mode = 'r+'
+        mode = "r+"
 
     man = SortingManager(datafname)
     sort_fid = tables.open_file(sorting_fname, mode)
-    sign = sort_fid.get_node_attr('/', 'sign')
+    sign = sort_fid.get_node_attr("/", "sign")
 
     idx = sort_fid.root.index[:]
-    spikes = man.get_data_by_name_and_index('spikes', idx, sign)
+    spikes = man.get_data_by_name_and_index("spikes", idx, sign)
     del man
-    print('Read {} spikes'.format(spikes.shape[0]))
+    print("Read {} spikes".format(spikes.shape[0]))
     classes = sort_fid.root.classes[:]
     artifacts = sort_fid.root.artifacts[:, :]
     group_arr = artifacts.copy().astype(np.int16)
@@ -101,10 +111,10 @@ def main(datafname, sorting_fname, read_only=False):
     clids = artifacts[~art_idx, 0]
 
     group_arr[art_idx, 1] = GROUP_ART
-    print('Classes: {}'.format(clids))
+    print("Classes: {}".format(clids))
 
     groups = create_groups(spikes, classes, clids, sign)
-    
+
     for grid, orig_grid in enumerate(sorted(groups.keys())):
         clids = groups[orig_grid]
         for clid in clids:
@@ -118,20 +128,20 @@ def main(datafname, sorting_fname, read_only=False):
     if not read_only:
 
         try:
-            sort_fid.remove_node('/', 'groups')
-            print('Updating grouping')
+            sort_fid.remove_node("/", "groups")
+            print("Updating grouping")
         except tables.NoSuchNodeError:
-            print('Creating grouping')
+            print("Creating grouping")
 
-        sort_fid.create_array('/', 'groups', group_arr)
+        sort_fid.create_array("/", "groups", group_arr)
 
         try:
-            sort_fid.remove_node('/', 'groups_orig')
-            print('Updating original grouping')
+            sort_fid.remove_node("/", "groups_orig")
+            print("Updating original grouping")
         except tables.NoSuchNodeError:
-            print('Creating original grouping')
+            print("Creating original grouping")
 
-        sort_fid.create_array('/', 'groups_orig', group_arr)
+        sort_fid.create_array("/", "groups_orig", group_arr)
 
     # assign types
     group_names = np.unique(group_arr[:, 1])
@@ -145,21 +155,21 @@ def main(datafname, sorting_fname, read_only=False):
 
     if not read_only:
         try:
-            sort_fid.remove_node('/', 'types')
-            print('Updating types')
+            sort_fid.remove_node("/", "types")
+            print("Updating types")
         except tables.NoSuchNodeError:
-            print('Creating types')
+            print("Creating types")
 
-        sort_fid.create_array('/', 'types', types)
+        sort_fid.create_array("/", "types", types)
 
         # create backups of types
         try:
-            sort_fid.remove_node('/', 'types_orig')
-            print('Updating original types')
+            sort_fid.remove_node("/", "types_orig")
+            print("Updating original types")
         except tables.NoSuchNodeError:
-            print('Storing original types')
+            print("Storing original types")
 
-        sort_fid.create_array('/', 'types_orig', types)
+        sort_fid.create_array("/", "types_orig", types)
 
         sort_fid.flush()
 

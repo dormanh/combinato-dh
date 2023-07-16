@@ -16,41 +16,45 @@ import tables
 
 from .. import h5files
 
-SIGNS = ('pos', 'neg')
+SIGNS = ("pos", "neg")
 DEBUG = True
 RESET = True  # set artifacts to 0 before analysis
 READONLY = False
-MODE = 'first'  # MODE can be 'first', 'last', or 'OR'
+MODE = "first"  # MODE can be 'first', 'last', or 'OR'
 
 
-options_by_diff = {'art_id': 1,   # to identify this type of artifact
-                   'name': 'high_firing',
-                   'binlength': 500,  # msec
-                   'max_spk_per_bin': 100}  # means 200 Hz maximum
+options_by_diff = {
+    "art_id": 1,  # to identify this type of artifact
+    "name": "high_firing",
+    "binlength": 500,  # msec
+    "max_spk_per_bin": 100,
+}  # means 200 Hz maximum
 
-options_by_height = {'art_id': 2,
-                     'name': 'amplitude',
-                     'max_height': 1000}  # µV
+options_by_height = {"art_id": 2, "name": "amplitude", "max_height": 1000}  # µV
 
-options_by_bincount = {'art_id': 4,
-                       'name': 'bincount',
-                       'max_frac_ch': .5}
+options_by_bincount = {"art_id": 4, "name": "bincount", "max_frac_ch": 0.5}
 
-options_double = {'art_id': 8,
-                  'name': 'double',
-                  'relevant_idx': 18,  # look here for decision, very specific!
-                  'min_dist': 1.5}  # means 1.5 ms minimum distance
+options_double = {
+    "art_id": 8,
+    "name": "double",
+    "relevant_idx": 18,  # look here for decision, very specific!
+    "min_dist": 1.5,
+}  # means 1.5 ms minimum distance
 
-options_ranges = {'art_id': 16,
-                  'name': 'range'}
+options_ranges = {"art_id": 16, "name": "range"}
 
-artifact_types = (options_by_diff, options_by_height,
-                  options_by_bincount, options_double, options_ranges)
+artifact_types = (
+    options_by_diff,
+    options_by_height,
+    options_by_bincount,
+    options_double,
+    options_ranges,
+)
 
 id_to_name = {}
 
 for options in artifact_types:
-    id_to_name[options['art_id']] = options['name']
+    id_to_name[options["art_id"]] = options["name"]
 
 
 def add_id(artifacts, index, art_id, sign):
@@ -59,29 +63,32 @@ def add_id(artifacts, index, art_id, sign):
     """
     if DEBUG:
         detected = index.sum()
-        if MODE == 'first':
+        if MODE == "first":
             masked = ((index != 0) & (artifacts[:] == 0)).sum()
         else:
             masked = detected
-        print('{}: detected {} {} spikes, masked {} in mode "{}"'.
-              format(id_to_name[art_id], detected, sign, masked, MODE))
+        print(
+            '{}: detected {} {} spikes, masked {} in mode "{}"'.format(
+                id_to_name[art_id], detected, sign, masked, MODE
+            )
+        )
 
     if READONLY:
         return
 
-    if MODE == 'last':
+    if MODE == "last":
         # only the last one counts
         artifacts[index] = art_id
-    elif MODE == 'OR':
+    elif MODE == "OR":
         # do a logical OR
         artifacts[index] |= art_id
-    elif MODE == 'first':
+    elif MODE == "first":
         # only the first one counts
         artifacts[index & (artifacts[:] == 0)] = art_id
     else:
-        raise ValueError('Unknown artifact storage mode: {}'.format(MODE))
+        raise ValueError("Unknown artifact storage mode: {}".format(MODE))
 
-    print('Total: ', (artifacts[:] != 0).sum())
+    print("Total: ", (artifacts[:] != 0).sum())
 
 
 def mark_range_detection(times, ranges):
@@ -96,7 +103,7 @@ def mark_range_detection(times, ranges):
         print(idx.sum())
         artifacts[idx] |= True
 
-    return artifacts, options_ranges['art_id']
+    return artifacts, options_ranges["art_id"]
 
 
 def mark_double_detection(times, spikes, sign):
@@ -106,14 +113,14 @@ def mark_double_detection(times, spikes, sign):
     """
 
     def mycmp(a, b, sign):
-        if sign == 'pos':
+        if sign == "pos":
             return a > b
-        elif sign == 'neg':
+        elif sign == "neg":
             return a < b
 
     artifacts = np.zeros(times.shape[0], dtype=bool)
-    min_dist = options_double['min_dist']
-    rel_idx = options_double['relevant_idx']
+    min_dist = options_double["min_dist"]
+    rel_idx = options_double["relevant_idx"]
     diff = np.diff(times)
     double_idx = diff < min_dist
 
@@ -126,20 +133,20 @@ def mark_double_detection(times, spikes, sign):
             kill = i
         artifacts[kill] = True
 
-    print('{} dist < {}'.format((double_idx).sum(), min_dist))
-    return artifacts, options_double['art_id']
+    print("{} dist < {}".format((double_idx).sum(), min_dist))
+    return artifacts, options_double["art_id"]
 
 
 def mark_by_diff(times):
     """
     marks bins with too many events
     """
-    bin_len = options_by_diff['binlength']
-    max_per_bin = options_by_diff['max_spk_per_bin']
+    bin_len = options_by_diff["binlength"]
+    max_per_bin = options_by_diff["max_spk_per_bin"]
 
     artifacts = np.zeros(times.shape[0], dtype=bool)
 
-    for shift in (0, bin_len/2):
+    for shift in (0, bin_len / 2):
         bins = np.arange(times[0] + shift, times[-1] + shift, bin_len)
         if len(bins) < 2:
             continue
@@ -147,30 +154,30 @@ def mark_by_diff(times):
         left_edges_too_many = bins[:-1][counts > max_per_bin]
         # try a loop, but maybe too slow?
         if DEBUG:
-            print('looping over {} edges'.format(left_edges_too_many.shape[0]))
+            print("looping over {} edges".format(left_edges_too_many.shape[0]))
         for edge in left_edges_too_many:
             idx = (times >= edge) & (times <= edge + bin_len)
             artifacts[idx] = True
 
-    return artifacts, options_by_diff['art_id']
+    return artifacts, options_by_diff["art_id"]
 
 
 def bincount_to_edges(concurrent_fname):
     """
     helper, transforms bincount to edges
     """
-    conc_fid = tables.open_file(concurrent_fname, 'r')
+    conc_fid = tables.open_file(concurrent_fname, "r")
     count = conc_fid.root.count[:]
     attrs = conc_fid.root.count.attrs
-    num_channels = attrs['nch']
-    start = attrs['start']
-    stop = attrs['stop']
-    bin_len = attrs['binms']
+    num_channels = attrs["nch"]
+    start = attrs["start"]
+    stop = attrs["stop"]
+    bin_len = attrs["binms"]
     conc_fid.close()
     bins = np.arange(start, stop, bin_len)
-    cutoff = options_by_bincount['max_frac_ch'] * num_channels
+    cutoff = options_by_bincount["max_frac_ch"] * num_channels
     if DEBUG:
-        print('Using cutoff of {:.0f} channels'.format(cutoff))
+        print("Using cutoff of {:.0f} channels".format(cutoff))
     exclusion_left_edges = bins[:-1][count > cutoff]
     return exclusion_left_edges, bin_len
 
@@ -180,8 +187,9 @@ def mark_by_bincount(times, left_edges, bin_len):
     marks bins with events in too many other channels (specified by counts)
     """
     if DEBUG:
-        print('all channel rejection, looping over {} edges'.
-              format(left_edges.shape[0]))
+        print(
+            "all channel rejection, looping over {} edges".format(left_edges.shape[0])
+        )
 
     artifacts = np.zeros(times.shape[0], dtype=bool)
 
@@ -189,27 +197,26 @@ def mark_by_bincount(times, left_edges, bin_len):
         idx = (times >= edge) & (times <= edge + bin_len)
         artifacts[idx] = True
 
-    return artifacts, options_by_bincount['art_id']
+    return artifacts, options_by_bincount["art_id"]
 
 
 def mark_by_height(spikes, sign):
     """
     marks spikes that exceed a height criterion
     """
-    max_height = options_by_height['max_height']
+    max_height = options_by_height["max_height"]
 
-    if sign == 'pos':
+    if sign == "pos":
         artifacts = spikes.max(1) >= max_height
-    elif sign == 'neg':
+    elif sign == "neg":
         artifacts = spikes.min(1) <= -max_height
     else:
-        raise ValueError('Unknown sign: ' + sign)
+        raise ValueError("Unknown sign: " + sign)
 
-    return artifacts, options_by_height['art_id']
+    return artifacts, options_by_height["art_id"]
 
 
-def main(fname, concurrent_edges=None, concurrent_bin=None,
-         exlude_ranges=None):
+def main(fname, concurrent_edges=None, concurrent_bin=None, exlude_ranges=None):
     """
     creates table to store artifact information
     """
@@ -217,15 +224,15 @@ def main(fname, concurrent_edges=None, concurrent_bin=None,
 
         # why is this here?
         if READONLY:
-            mode = 'r'
+            mode = "r"
         else:
-            mode = 'r+'
+            mode = "r+"
         h5fid = tables.open_file(fname, mode)
 
         try:
-            node = h5fid.get_node('/' + sign + '/times')
+            node = h5fid.get_node("/" + sign + "/times")
         except tables.NoSuchNodeError:
-            print('{} has no {} spikes'.format(fname, sign))
+            print("{} has no {} spikes".format(fname, sign))
             h5fid.close()
             continue
 
@@ -240,16 +247,17 @@ def main(fname, concurrent_edges=None, concurrent_bin=None,
         times = node[:]
         num_spk = times.shape[0]
 
-        spikes = h5fid.get_node('/' + sign, 'spikes')[:, :]
+        spikes = h5fid.get_node("/" + sign, "spikes")[:, :]
 
         assert num_spk == spikes.shape[0]
 
         try:
-            artifacts = h5fid.get_node('/' + sign + '/artifacts')
+            artifacts = h5fid.get_node("/" + sign + "/artifacts")
         except tables.NoSuchNodeError:
-            h5fid.create_array('/' + sign, 'artifacts',
-                               atom=tables.Int8Atom(), shape=(num_spk, ))
-            artifacts = h5fid.get_node('/' + sign + '/artifacts')
+            h5fid.create_array(
+                "/" + sign, "artifacts", atom=tables.Int8Atom(), shape=(num_spk,)
+            )
+            artifacts = h5fid.get_node("/" + sign + "/artifacts")
         if RESET:
             artifacts[:] = 0
 
@@ -277,9 +285,9 @@ def main(fname, concurrent_edges=None, concurrent_bin=None,
         #          format(arti_by_double.sum(), sign))
 
         if concurrent_edges is not None:
-            arti_by_conc, arti_by_conc_id = mark_by_bincount(times,
-                                                             concurrent_edges,
-                                                             concurrent_bin)
+            arti_by_conc, arti_by_conc_id = mark_by_bincount(
+                times, concurrent_edges, concurrent_bin
+            )
             add_id(artifacts, arti_by_conc, arti_by_conc_id, sign)
 
             # artifacts[arti_by_conc != 0] = arti_by_conc_id
@@ -288,8 +296,7 @@ def main(fname, concurrent_edges=None, concurrent_bin=None,
             #          format(arti_by_conc.sum(), sign))
 
         if exlude_ranges is not None:
-            arti_by_ranges, range_id = mark_range_detection(times,
-                                                            exlude_ranges)
+            arti_by_ranges, range_id = mark_range_detection(times, exlude_ranges)
             add_id(artifacts, arti_by_ranges, range_id, sign)
             # artifacts[arti_by_ranges != 0] = range_id
 
@@ -301,12 +308,15 @@ def main(fname, concurrent_edges=None, concurrent_bin=None,
 
 
 def parse_args():
-    CONC_FNAME = 'concurrent_times.h5'
+    CONC_FNAME = "concurrent_times.h5"
     parser = ArgumentParser()
-    parser.add_argument('--file', '--datafile', nargs=1)
-    parser.add_argument('--concurrent-file', nargs=1)
-    parser.add_argument('--exclude-ranges', nargs=1,
-                        help='supply a file with timestamp ranges to exclude')
+    parser.add_argument("--file", "--datafile", nargs=1)
+    parser.add_argument("--concurrent-file", nargs=1)
+    parser.add_argument(
+        "--exclude-ranges",
+        nargs=1,
+        help="supply a file with timestamp ranges to exclude",
+    )
     args = parser.parse_args()
 
     if args.concurrent_file:
@@ -315,10 +325,9 @@ def parse_args():
         conc_fname = CONC_FNAME
 
     if os.path.isfile(conc_fname):
-        concurrent_edges, concurrent_bin =\
-            bincount_to_edges(conc_fname)
+        concurrent_edges, concurrent_bin = bincount_to_edges(conc_fname)
     else:
-        print('Not using concurrent spike detection')
+        print("Not using concurrent spike detection")
         concurrent_edges = concurrent_bin = None
 
     if args.file:
@@ -334,7 +343,7 @@ def parse_args():
     if args.exclude_ranges:
         fname = args.exclude_ranges[0]
         exclude_ranges = []
-        with open(fname, 'r') as fid:
+        with open(fname, "r") as fid:
             for line in fid.readlines():
                 ranges = [float(x) for x in line.strip().split()]
                 exclude_ranges.append(ranges)
@@ -345,8 +354,9 @@ def parse_args():
     # processing (bad because of high I/O)
     for fname in files:
         if DEBUG:
-            print('Starting ' + fname)
+            print("Starting " + fname)
         main(fname, concurrent_edges, concurrent_bin, exclude_ranges)
+
 
 if __name__ == "__main__":
     parse_args()

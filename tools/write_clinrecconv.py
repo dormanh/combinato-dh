@@ -8,11 +8,11 @@ from combinato import NcsFile
 from matplotlib.dates import date2num
 
 if __name__ == "__main__":
-    if os.path.exists('clinRecConv.py'):
-        print('File exists, doing nothing')
+    if os.path.exists("clinRecConv.py"):
+        print("File exists, doing nothing")
     else:
-        fid = NcsFile('CSC1.ncs')
-        d = fid.header['opened']
+        fid = NcsFile("CSC1.ncs")
+        d = fid.header["opened"]
         n = date2num(d)
-        ts = fid.read(0, 1, 'timestep')
-        np.save('clinRecConv', np.array((ts, d)))
+        ts = fid.read(0, 1, "timestep")
+        np.save("clinRecConv", np.array((ts, d)))

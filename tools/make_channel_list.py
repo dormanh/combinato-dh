@@ -23,11 +23,11 @@ def main(fnames):
     for name in fnames:
         fid = NcsFile(name)
         label = os.path.splitext(name)[0]
-        entity = fid.header['AcqEntName']
+        entity = fid.header["AcqEntName"]
         out_data.append((label, entity))
 
-    with open(FNAME_OUT, 'w') as fid:
-        csv_writer = csv.writer(fid, delimiter=';')
+    with open(FNAME_OUT, "w") as fid:
+        csv_writer = csv.writer(fid, delimiter=";")
         csv_writer.writerows(out_data)
 
 

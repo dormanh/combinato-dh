@@ -12,6 +12,7 @@ class Cluster(object):
     can objects vanish from memory, so that the
     'value' problem of dictionaries is solved?
     """
+
     def __init__(self, name, imagepath, spikes, times):
         self.name = name
         self.imagepath = imagepath

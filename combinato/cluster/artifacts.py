@@ -32,7 +32,7 @@ def find_maxima_ratio(data, tolerance):
 
     if num > 1:
         vals = np.sort(data[peaks[idx.nonzero()[0]]])
-        ratio = np.abs(vals[-1]/vals[-2])
+        ratio = np.abs(vals[-1] / vals[-2])
     else:
         ratio = np.inf
 
@@ -43,22 +43,22 @@ def max_min_ratio(data):
     """
     ratio of maximum and minimum. data: mean spike
     """
-    return np.abs(data.max()/data.min())
+    return np.abs(data.max() / data.min())
 
 
 def std_err_mean(data):
     """
     calculates deviation from mean. data: all spikes
     """
-    return data.std(0).mean()/np.sqrt(data.shape[0])
+    return data.std(0).mean() / np.sqrt(data.shape[0])
 
 
 def peak_to_peak(data):
     """
     peak to peak ratio in second half. data: mean spike
     """
-    cut = int(data.shape[0]/2)
-    return (data[cut:] - data[0]).ptp()/data.max()
+    cut = int(data.shape[0] / 2)
+    return (data[cut:] - data[0]).ptp() / data.max()
 
 
 def artifact_score(data):
@@ -76,25 +76,25 @@ def artifact_score(data):
     score = 0
     reasons = []
 
-    if num_peaks > CRIT['maxima']:
+    if num_peaks > CRIT["maxima"]:
         score += 1
-        reasons.append('maxima')
+        reasons.append("maxima")
 
-    if peak_ratio < CRIT['maxima_1_2_ratio']:
+    if peak_ratio < CRIT["maxima_1_2_ratio"]:
         score += 1
-        reasons.append('maxima_1_2_ratio')
+        reasons.append("maxima_1_2_ratio")
 
-    if ratio < CRIT['max_min_ratio']:
+    if ratio < CRIT["max_min_ratio"]:
         score += 1
-        reasons.append('max_min_ratio')
+        reasons.append("max_min_ratio")
 
-    if std_err > CRIT['sem']:
+    if std_err > CRIT["sem"]:
         score += 1
-        reasons.append('sem')
+        reasons.append("sem")
 
-    if ptp > CRIT['ptp']:
+    if ptp > CRIT["ptp"]:
         score += 1
-        reasons.append('ptp')
+        reasons.append("ptp")
 
     # return mean for convenience
     return score, reasons, mean
@@ -115,7 +115,7 @@ def find_artifacts(spikes, sorted_idx, class_ids, invert=False):
         if invert:
             class_spikes = -class_spikes
         score, reasons, _ = artifact_score(class_spikes)
-        if options['Debug']:
+        if options["Debug"]:
             print(class_id, score, reasons)
         artifact_idx[class_idx] = score
         if score:
@@ -128,7 +128,12 @@ def testit():
     """
     usual tests
     """
-    data = np.array([[0, 1, 14, 5, 5, 5, 5, 20, 30, 0, 11, 0],
-                     [-1, 3, 12, 3, 4, 7, 7, 20, 30, 0, 11, 1]], float)
+    data = np.array(
+        [
+            [0, 1, 14, 5, 5, 5, 5, 20, 30, 0, 11, 0],
+            [-1, 3, 12, 3, 4, 7, 7, 20, 30, 0, 11, 1],
+        ],
+        float,
+    )
 
     print(artifact_score(data))

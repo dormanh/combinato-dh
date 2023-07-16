@@ -19,34 +19,35 @@ def initial_test():
     try:
         import combinato.default_options
     except ImportError as error:
-        print('Unable to load Combinato: {}'.format(error))
-        print('Check your PYTHONPATH and make sure to copy\n'
-              'combinato/default_options.py to combinato/options.py')
+        print("Unable to load Combinato: {}".format(error))
+        print(
+            "Check your PYTHONPATH and make sure to copy\n"
+            "combinato/default_options.py to combinato/options.py"
+        )
         return False
-    print('Found Combinato')
+    print("Found Combinato")
 
     # now check if SPC binary is callable
     try:
-        subprocess.call(combinato.options['ClusterPath'],
-                        stdout=subprocess.PIPE)
+        subprocess.call(combinato.options["ClusterPath"], stdout=subprocess.PIPE)
     except OSError as error:
-        print('SPC binary not found or not executable: {}'.format(error))
-        print('Place SPC binary in a folder and set path in options.py')
+        print("SPC binary not found or not executable: {}".format(error))
+        print("Place SPC binary in a folder and set path in options.py")
         return False
-    print('Found SPC binary')
+    print("Found SPC binary")
 
     # check for version of tables
     try:
         import tables
     except ImportError as error:
-        print('Unable to import tables: {}'.format(error))
-        print('Please install pytables')
+        print("Unable to import tables: {}".format(error))
+        print("Please install pytables")
         return False
 
     tabversion = tables.__version__
-    print('Your version of pytables is ' + tabversion)
+    print("Your version of pytables is " + tabversion)
     if int(tabversion[0]) < 3:
-        print('But you need at least 3.0.0')
+        print("But you need at least 3.0.0")
         return False
 
     return True
@@ -58,6 +59,7 @@ def manager_test(fname, label, ts):
     Requires certain files to be present
     """
     from combinato.manager.manager_cat import test
+
     test(fname, label, ts)
 
 
@@ -65,26 +67,31 @@ def plotting_test():
     """
     run a rudimentary test whether plotting will work
     """
-    if 'linux' in sys.platform:
-        if 'DISPLAY' not in os.environ:
-            print('You are using linux without graphical environment. '
-                  'Plotting will not work. Try ssh -X.')
+    if "linux" in sys.platform:
+        if "DISPLAY" not in os.environ:
+            print(
+                "You are using linux without graphical environment. "
+                "Plotting will not work. Try ssh -X."
+            )
         else:
-            print('Found display')
+            print("Found display")
     try:
-        subprocess.call('montage', stdout=subprocess.PIPE)
+        subprocess.call("montage", stdout=subprocess.PIPE)
     except OSError as error:
-        print("'montage' from ImageMagick not found: {}\n"
-              "Plotting continuous data will not work".format(error))
+        print(
+            "'montage' from ImageMagick not found: {}\n"
+            "Plotting continuous data will not work".format(error)
+        )
     else:
         print("Found 'montage', plotting continuous data possible.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     if initial_test():
-        print('Combinato clustering setup: no problems detected.')
+        print("Combinato clustering setup: no problems detected.")
     else:
-        print('Re-run after fixing problems.')
+        print("Re-run after fixing problems.")
 
     plotting_test()
 

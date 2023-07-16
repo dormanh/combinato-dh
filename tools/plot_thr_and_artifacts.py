@@ -26,13 +26,14 @@ import tables
 import matplotlib.pyplot as mpl
 import matplotlib.cm as cm
 
-from combinato import SortingManagerGrouped, get_regions, artifact_id_to_name 
+from combinato import SortingManagerGrouped, get_regions, artifact_id_to_name
+
 print(artifact_id_to_name)
 
 
 FIGSIZE = (7, 6)
 
-REGIONS = ('A', 'AH', 'MH', 'PH', 'EC', 'PHC', 'I')
+REGIONS = ("A", "AH", "MH", "PH", "EC", "PHC", "I")
 
 LEFT_COLORS = cm.spectral(np.linspace(0, 1, len(REGIONS)))
 RIGHT_COLORS = cm.summer(np.linspace(0, 1, len(REGIONS)))
@@ -41,15 +42,15 @@ NUM_COLORS = cm.winter(np.linspace(0, 1, 8))
 COLORDICT = {}
 
 for i, region in enumerate(REGIONS):
-    COLORDICT['L' + region] = LEFT_COLORS[i]
-    COLORDICT['R' + region] = RIGHT_COLORS[i]
+    COLORDICT["L" + region] = LEFT_COLORS[i]
+    COLORDICT["R" + region] = RIGHT_COLORS[i]
 
 for i in range(1, 9):
-    COLORDICT[str(i)] = NUM_COLORS[i-1]
-JOBS = ('thr', 'arti')
+    COLORDICT[str(i)] = NUM_COLORS[i - 1]
+JOBS = ("thr", "arti")
 
 
-def plotthr(thrplot, fireplot, thr, times, color='r'):
+def plotthr(thrplot, fireplot, thr, times, color="r"):
     """
     plot the threshold data
     """
@@ -62,7 +63,7 @@ def plotthr(thrplot, fireplot, thr, times, color='r'):
     thrplot.plot(xdata, thrs, color=color)
     thrplot.set_xlim(xlim)
 
-    xtimes = (times - times[0])/6e4
+    xtimes = (times - times[0]) / 6e4
     # countdata = np.linspace(0, 1, len(xtimes))
 
     # fireplot.plot(xtimes, countdata, color=color)
@@ -81,14 +82,14 @@ def plotthr(thrplot, fireplot, thr, times, color='r'):
 def create_plots():
     fig = mpl.figure(figsize=FIGSIZE)
     plot = fig.add_subplot(1, 2, 1)
-    plot.set_ylabel(u'µV')
-    plot.set_xlabel(u'min')
-    plot.set_title(u'Extraction threshold over time')
+    plot.set_ylabel("µV")
+    plot.set_xlabel("min")
+    plot.set_title("Extraction threshold over time")
     plot2 = fig.add_subplot(1, 2, 2)
     # plot2 = plot.twinx()
-    plot2.set_xlabel(u'min')
-    plot2.set_ylabel('% fired')
-    plot2.set_title('Spike count over time')
+    plot2.set_xlabel("min")
+    plot2.set_ylabel("% fired")
+    plot2.set_title("Spike count over time")
 
     return plot, plot2
 
@@ -100,11 +101,11 @@ def plotarti(artifacts):
     tot = len(artifacts)
 
     for artid, name in artifact_id_to_name:
-        perc = (artifacts == artid).sum()/tot
-        print('{}: {:.1%}'.format(name, perc))
+        perc = (artifacts == artid).sum() / tot
+        print("{}: {:.1%}".format(name, perc))
 
 
-def main(fnames, sign='pos', title=''):
+def main(fnames, sign="pos", title=""):
     """
     opens the file, calls plot
     """
@@ -116,38 +117,39 @@ def main(fnames, sign='pos', title=''):
 
     for fname in fnames:
         if os.path.isdir(fname):
-            fname = os.path.join(fname, 'data_' + fname + '.h5')
+            fname = os.path.join(fname, "data_" + fname + ".h5")
 
         man = SortingManagerGrouped(fname)
 
         thr = man.h5datafile.root.thr[:]
-        times = man.h5datafile.get_node('/' + sign, 'times')[:]
+        times = man.h5datafile.get_node("/" + sign, "times")[:]
         if not len(times):
             continue
 
         try:
-            artifacts = man.h5datafile.get_node('/' + sign, 'artifacts')[:]
+            artifacts = man.h5datafile.get_node("/" + sign, "artifacts")[:]
         except tables.NoSuchNodeError:
-            print('No artifacts defined')
+            print("No artifacts defined")
             artifacts = None
 
         if man.header is not None:
-            entname = man.header['AcqEntName']
+            entname = man.header["AcqEntName"]
             print(entname[-1])
             color = COLORDICT[entname[-1]]
             entname = entname[-1]
         else:
-            color = 'k'
-            entname = 'unknown region'
+            color = "k"
+            entname = "unknown region"
         del man
 
-        if 'thr' in JOBS:
+        if "thr" in JOBS:
             plotthr(thrplot, fireplot, thr, times, color)
             if entname not in thr_legend_handles:
-                thr_legend_handles[entname] = mpl.Line2D([0], [0], color=color,
-                                                         label=entname)
+                thr_legend_handles[entname] = mpl.Line2D(
+                    [0], [0], color=color, label=entname
+                )
 
-        if 'arti' in JOBS:
+        if "arti" in JOBS:
             if artifacts is not None:
                 plotarti(artifacts)
 
@@ -159,6 +161,7 @@ def loop_over_regions(path):
     do the plots by region
     """
     from collections import defaultdict
+
     regions = get_regions(path)
     regions_to_fnames = defaultdict(list)
     for reg in regions:
@@ -168,7 +171,7 @@ def loop_over_regions(path):
                 regions_to_fnames[reg].append(os.path.basename(fname[:-4]))
 
     for reg in regions_to_fnames:
-        main(regions_to_fnames[reg], 'pos', reg)
+        main(regions_to_fnames[reg], "pos", reg)
 
 
 if __name__ == "__main__":

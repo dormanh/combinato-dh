@@ -9,13 +9,13 @@ from matplotlib.pyplot import cm
 cmap = cm.Blues
 
 # idea taken from http://stackoverflow.com/a/14779462
-cmaplist = [cmap(i) for i in range(int(cmap.N/4), cmap.N)]
+cmaplist = [cmap(i) for i in range(int(cmap.N / 4), cmap.N)]
 # set first color to white
 cmaplist[0] = (1, 1, 1, 1)
 # set last color to black
 cmaplist[-1] = (0, 0, 0, 1)
 
-cmap = cmap.from_list('Custom cmap', cmaplist, cmap.N)
+cmap = cmap.from_list("Custom cmap", cmaplist, cmap.N)
 spDisplayBorder = 5  # µV additional border in display
 
 
@@ -25,7 +25,7 @@ def spike_heatmap(ax, spikes, x=None, log=False):
     """
     spMin = spikes.min()
     spMax = spikes.max()
-    spBins = np.linspace(spMin, spMax, int(round(2*spMax)))
+    spBins = np.linspace(spMin, spMax, int(round(2 * spMax)))
     if spBins.shape[0] < 3:
         spBins = np.linspace(spMin, spMax, 3)
 
@@ -43,21 +43,23 @@ def spike_heatmap(ax, spikes, x=None, log=False):
         else:
             imdata[:, col] = data
 
-    ydiff = (spBins[1] - spBins[0])/2.
-    extent = [x[0], x[-1], spMin-ydiff, spMax-ydiff]
+    ydiff = (spBins[1] - spBins[0]) / 2.0
+    extent = [x[0], x[-1], spMin - ydiff, spMax - ydiff]
 
-    ax.imshow(imdata,
-              cmap=cmap,
-              interpolation='hanning',
-              aspect='auto',
-              origin='lower',
-              extent=extent)
+    ax.imshow(
+        imdata,
+        cmap=cmap,
+        interpolation="hanning",
+        aspect="auto",
+        origin="lower",
+        extent=extent,
+    )
 
     spMean = spikes.mean(0)
     spStd = spikes.std(0)
 
-    ax.plot(x, spMean, 'k', lw=1)
-    ax.plot(x, spMean + spStd, color=(.2, .2, .2), lw=1)
-    ax.plot(x, spMean - spStd, color=(.2, .2, .2), lw=1)
+    ax.plot(x, spMean, "k", lw=1)
+    ax.plot(x, spMean + spStd, color=(0.2, 0.2, 0.2), lw=1)
+    ax.plot(x, spMean - spStd, color=(0.2, 0.2, 0.2), lw=1)
 
     ax.set_xlim((x[0], x[-1]))

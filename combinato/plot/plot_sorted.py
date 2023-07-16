@@ -18,16 +18,18 @@ from .. import Combinato, TYPE_NAMES, h5files
 from .plot_cumulative_time import spike_cumulative
 from .spike_heatmap import spike_heatmap
 
-SIGNS = ('pos', 'neg')
+SIGNS = ("pos", "neg")
 BOXSIZE = 1
 NCOLS = 7
 FONTSIZE = 8
-GRID_ARGS = {'left': .005,
-             'right': .995,
-             'bottom': .005,
-             'top': .995,
-             'wspace': 0,
-             'hspace': 0}
+GRID_ARGS = {
+    "left": 0.005,
+    "right": 0.995,
+    "bottom": 0.005,
+    "top": 0.995,
+    "wspace": 0,
+    "hspace": 0,
+}
 
 
 def clust_overview_plot(groups, outname):
@@ -41,44 +43,45 @@ def clust_overview_plot(groups, outname):
 
     # calculate number of rows
     for group in groups.values():
-        nrows += np.ceil((len(group['images']) + 2.1)/NCOLS)
+        nrows += np.ceil((len(group["images"]) + 2.1) / NCOLS)
         # print(len(group['images']), nrows)
 
     nrows = max(nrows, 1)
     grid = GridSpec(int(nrows), NCOLS, **GRID_ARGS)
 
-    fig = mpl.figure(figsize=(NCOLS*BOXSIZE, nrows*BOXSIZE))
+    fig = mpl.figure(figsize=(NCOLS * BOXSIZE, nrows * BOXSIZE))
 
     row = 0
 
     for gid in sorted(groups.keys()):
-        print(gid, end=' ')
+        print(gid, end=" ")
         group = groups[gid]
-        gtype = TYPE_NAMES[group['type']]
+        gtype = TYPE_NAMES[group["type"]]
 
         col = 0
-        print('row {}/{}, col {}/{}'.format(row, nrows, col, NCOLS))
+        print("row {}/{}, col {}/{}".format(row, nrows, col, NCOLS))
         plot = fig.add_subplot(grid[row, col])
         # summary plot
-        spike_heatmap(plot, group['spikes'])
+        spike_heatmap(plot, group["spikes"])
         plot.set_xticks([])
         plot.set_yticks([])
-        plot.axis('off')
+        plot.axis("off")
         plot = plot.twiny()
-        spike_cumulative(plot, np.sort(group['times']), special=False)
+        spike_cumulative(plot, np.sort(group["times"]), special=False)
         plot.set_xticks([])
         plot.set_yticks([])
 
         # label it
-        label = '{} {} {}'.format(gid, len(group['times']), gtype)
+        label = "{} {} {}".format(gid, len(group["times"]), gtype)
         print(label)
         pos = (plot.get_xlim()[0], plot.get_ylim()[0])
-        plot.text(pos[0], pos[1], label, backgroundcolor='w',
-                  va='bottom', fontsize=FONTSIZE)
+        plot.text(
+            pos[0], pos[1], label, backgroundcolor="w", va="bottom", fontsize=FONTSIZE
+        )
 
         # plot all subclusters
         col = 1
-        for img_name in group['images']:
+        for img_name in group["images"]:
             try:
                 print(img_name)
                 image = mpl.imread(img_name)
@@ -90,10 +93,10 @@ def clust_overview_plot(groups, outname):
                 col = 0
                 row += 1
 
-            print('row {}/{}, col {}/{}'.format(row, nrows, col, NCOLS))
+            print("row {}/{}, col {}/{}".format(row, nrows, col, NCOLS))
             plot = fig.add_subplot(grid[row, col])
             plot.imshow(image)
-            plot.axis('off')
+            plot.axis("off")
             plot.set_xticks([])
             plot.set_yticks([])
             col += 1
@@ -102,7 +105,7 @@ def clust_overview_plot(groups, outname):
 
     # suptitle = '{} {} ... {}'.format(fname, sessions[0], sessions[-1])
     # fig.suptitle(suptitle)
-    print('saving to ' + outname)
+    print("saving to " + outname)
     fig.savefig(outname, dpi=300)
     mpl.close(fig)
 
@@ -117,12 +120,12 @@ def run_file(fname, savefolder, sign, label):
         return
 
     if manager.header is not None:
-        entity = manager.header['AcqEntName']
+        entity = manager.header["AcqEntName"]
     else:
-        entity = 'unknown'
+        entity = "unknown"
 
     if not manager.initialized:
-        print('could not initialize ' + fname)
+        print("could not initialize " + fname)
         return
 
     # basedir = os.path.dirname(fname)
@@ -130,12 +133,12 @@ def run_file(fname, savefolder, sign, label):
     image_dict = manager.get_groups(times=False, spikes=False)
 
     for gid in groups:
-        groups[gid]['images'] = []
+        groups[gid]["images"] = []
         gtype = manager.get_group_type(gid)
-        groups[gid]['type'] = gtype
+        groups[gid]["type"] = gtype
         if gid in image_dict:
             for clid in image_dict[gid]:
-                groups[gid]['images'].append(image_dict[gid][clid]['image'])
+                groups[gid]["images"].append(image_dict[gid][clid]["image"])
 
     wext = os.path.splitext(os.path.basename(fname))[0]
     ncs_fname = wext[5:]
@@ -147,8 +150,7 @@ def run_file(fname, savefolder, sign, label):
     if groups is None:
         return
 
-    outname_base = 'sorted_{}_{}_{}_{}.png'.\
-        format(entity, ncs_fname, sign, label)
+    outname_base = "sorted_{}_{}_{}_{}.png".format(entity, ncs_fname, sign, label)
     outname = os.path.join(savefolder, outname_base)
     clust_overview_plot(groups, outname)
 
@@ -158,23 +160,24 @@ def parse_args():
     standard arg parser
     """
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
-    parser.add_argument('--files', '--datafiles', nargs='+')
-    parser.add_argument('--label', required=True)
-    parser.add_argument('--neg', action='store_true', default=False)
+    parser.add_argument("--files", "--datafiles", nargs="+")
+    parser.add_argument("--label", required=True)
+    parser.add_argument("--neg", action="store_true", default=False)
 
     args = parser.parse_args()
 
-    if not os.path.isdir('overview'):
-        os.mkdir('overview')
-    savefolder = 'overview'
+    if not os.path.isdir("overview"):
+        os.mkdir("overview")
+    savefolder = "overview"
 
     if args.files:
         fnames = args.files
     else:
         fnames = h5files(os.getcwd())
 
-    sign = 'neg' if args.neg else 'pos'
+    sign = "neg" if args.neg else "pos"
     label = args.label
 
     for fname in fnames:
