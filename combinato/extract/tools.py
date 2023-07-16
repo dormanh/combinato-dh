@@ -1,40 +1,28 @@
 """
 reading and writing data
 """
-# pylint: disable=E1101
+
 from __future__ import absolute_import, print_function, division
 import os
 import numpy as np
 import tables
 from .. import NcsFile, DefaultFilter
-
 from scipy.io import loadmat
 
+
 SAMPLES_PER_REC = 512
-DEFAULT_MAT_SR = 24000
+DEFAULT_MAT_SR = 32000
 
 
 def read_matfile(fname):
     """
     read data from a matfile
     """
-    data = loadmat(fname)
+    data = loadmat(fname)["cleanLFPsingleCH"].ravel()
+    ts = 1 / DEFAULT_MAT_SR
+    atimes = np.linspace(0, data.shape[0] / (DEFAULT_MAT_SR / 1000), data.shape[0])
 
-    try:
-        sr = data["sr"].ravel()[0]
-        insert = "stored"
-    except KeyError:
-        sr = DEFAULT_MAT_SR
-        insert = "default"
-
-    print("Using " + insert + " sampling rate ({} kHz)".format(sr / 1000.0))
-    ts = 1 / sr
-    fdata = data["data"].ravel()
-    atimes = np.linspace(0, fdata.shape[0] / (sr / 1000), fdata.shape[0])
-    # print(atimes.shape, fdata.shape)
-    # print(ts)
-
-    return fdata, atimes, ts
+    return data, atimes, ts
 
 
 class ExtractNcsFile(object):
